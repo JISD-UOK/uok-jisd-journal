@@ -3,575 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal of Integrative Science Development (JISD) | University of Kabridahar</title>
+  <title>Journal of Integrative Science Development (JISD)</title>
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root {
-      --navy-primary: #002B49;
-      --blue-secondary: #005691;
-      --gold-accent: #D4AF37;
-      --bg-light: #F8FAFC;
-      --card-white: #FFFFFF;
-      --text-dark: #0F172A;
-      --text-muted: #475569;
-      --border-color: #CBD5E1;
-      --success: #166534;
-      --warning: #92400E;
-      --danger: #991B1B;
-      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-stack); background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
-
-    header { background-color: var(--navy-primary); border-bottom: 4px solid var(--gold-accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .header-container { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    .brand-group { display: flex; align-items: center; gap: 1rem; }
-    .logo-img { height: 50px; width: 50px; object-fit: contain; background: #FFF; border-radius: 50%; padding: 2px; border: 2px solid var(--gold-accent); }
-    .brand-text h1 { color: #FFF; font-size: 1.2rem; font-weight: 700; line-height: 1.2; }
-    .brand-text p { color: #94A3B8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    nav { display: flex; gap: 0.5rem; align-items: center; }
-    .nav-btn { background: none; border: none; color: #E2E8F0; padding: 0.5rem 0.85rem; font-weight: 500; font-size: 0.88rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
-    .nav-btn:hover, .nav-btn.active { color: #FFF; background-color: rgba(255, 255, 255, 0.15); }
-    .btn-portal-cta { background-color: var(--gold-accent); color: var(--navy-primary); font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-
-    .main-layout { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 2.8fr 1.2fr; gap: 2rem; }
-    @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
-
-    .view-section { display: none; }
-    .view-section.active { display: block; }
-    .card { background: var(--card-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .card h2 { color: var(--navy-primary); font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 2px solid var(--bg-light); padding-bottom: 0.5rem; }
-
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy-primary); margin-bottom: 0.35rem; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; font-family: inherit; }
-    
-    .btn-action { background-color: var(--navy-primary); color: #FFF; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 0.5rem; }
-    .btn-action:hover { background-color: var(--blue-secondary); }
-    .btn-secondary { background-color: #E2E8F0; color: var(--text-dark); border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; border-radius: 4px; cursor: pointer; }
-
-    .paper-card { border: 1px solid var(--border-color); border-left: 4px solid var(--navy-primary); padding: 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; background: #FFF; }
-    .download-btn { display: inline-flex; align-items: center; gap: 0.4rem; background-color: var(--gold-accent); color: var(--navy-primary); padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-decoration: none; }
-
-    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-    .status-Submitted { background-color: #FEF3C7; color: var(--warning); }
-    .status-UnderReview { background-color: #E0F2FE; color: var(--blue-secondary); }
-    .status-Accepted { background-color: #DCFCE7; color: var(--success); }
-    .status-Published { background-color: #059669; color: #FFF; }
-    .status-Rejected { background-color: #FEE2E2; color: var(--danger); }
-    
-    .user-banner { background: #E0F2FE; border-left: 4px solid var(--blue-secondary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-
-    footer { background: var(--navy-primary); color: #94A3B8; text-align: center; padding: 1.5rem; font-size: 0.85rem; border-top: 4px solid var(--gold-accent); margin-top: 3rem; }
-  </style>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-gray-50 font-sans text-gray-800 antialiased">
 
-  <header>
-    <div class="header-container">
-      <div class="brand-group">
-        <img src="uok-logo.png" alt="UoK Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100/002B49/FFF?text=UoK'">
-        <div class="brand-text">
-          <h1>UoK - JISD</h1>
-          <p>Journal of Integrative Science Development | University of Kabridahar</p>
-        </div>
-      </div>
-      <nav id="top-nav-bar">
-        <button class="nav-btn active" onclick="switchView('home', this)">Home</button>
-        <button class="nav-btn" onclick="switchView('published', this)">Articles</button>
-        <button class="btn-portal-cta" id="nav-portal-btn" onclick="handlePortalClick()">Portal Dashboard</button>
-      </nav>
-    </div>
-  </header>
+  <div id="root"></div>
 
-  <div class="main-layout">
-    <main>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-      <!-- VIEW 1: HOME -->
-      <section id="view-home" class="view-section active">
-        <div class="card">
-          <h2>About the Journal</h2>
-          <p>The <strong>Journal of Integrative Science Development (JISD)</strong> is a peer-reviewed, open-access platform hosted by the University of Kabridahar.</p>
-        </div>
-        <div class="card">
-          <h2>Featured Research</h2>
-          <div id="homeFeaturedArticles"><p style="color: var(--text-muted);">Loading current issue...</p></div>
-        </div>
-      </section>
+    function App() {
+      const [activeSection, setActiveSection] = useState('editorial-board');
 
-      <!-- VIEW 2: ARTICLES LIBRARY -->
-      <section id="view-published" class="view-section">
-        <div class="card">
-          <h2>Published Articles Library</h2>
-          <div id="publishedArticlesList"><p style="text-align: center; color: var(--text-muted);">Loading papers archive...</p></div>
-        </div>
-      </section>
-
-      <!-- VIEW 3: AUTHOR DASHBOARD -->
-      <section id="view-dashboard" class="view-section">
-        <div class="user-banner">
-          <div>
-            <strong id="user-display-name">User Account</strong> (<span id="user-display-role">Author</span>)
-            <p id="user-display-email" style="font-size: 0.8rem; color: var(--text-muted);"></p>
-          </div>
-          <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2>Your Submissions</h2>
-          <button class="btn-portal-cta" onclick="switchView('submit', null)">+ Submit New Manuscript</button>
-        </div>
-
-        <div class="card">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                <th style="padding: 0.5rem;">Manuscript ID</th>
-                <th style="padding: 0.5rem;">Title</th>
-                <th style="padding: 0.5rem;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="submissionsTableBody">
-              <tr><td colspan="3" style="padding: 1rem; text-align: center;">Loading your submissions...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- VIEW 4: EDITORIAL BOARD PANEL -->
-      <section id="view-editor" class="view-section">
-        <div class="card" style="background: #FEF3C7; border-color: #F59E0B;">
-          <h2 style="color: #92400E;">Editor Dashboard (Dr. Mekuria Tsegaye)</h2>
-          <p style="font-size: 0.85rem;">Assign reviewers to submitted manuscripts and manage peer-review statuses.</p>
-        </div>
-
-        <div class="card">
-          <h2>Manuscript Assignment & Decision Board</h2>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-              <thead>
-                <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                  <th style="padding: 0.5rem;">ID</th>
-                  <th style="padding: 0.5rem;">Title & Author</th>
-                  <th style="padding: 0.5rem;">Assigned Reviewer</th>
-                  <th style="padding: 0.5rem;">Reviewer Feedback</th>
-                  <th style="padding: 0.5rem;">Publication Status</th>
-                </tr>
-              </thead>
-              <tbody id="editorTableBody">
-                <tr><td colspan="5" style="padding: 1rem; text-align: center;">Loading all submissions...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW 5: REVIEWER PORTAL -->
-      <section id="view-reviewer" class="view-section">
-        <div class="card" style="background: #E0F2FE; border-color: #005691;">
-          <h2>Reviewer Workspace</h2>
-          <p style="font-size: 0.85rem;">View papers assigned to you for peer-review, download manuscript files, enter feedback notes, upload review reports, and submit recommendations.</p>
-        </div>
-
-        <div class="card">
-          <h2>Assigned Manuscripts</h2>
-          <div id="reviewerAssignmentsList"><p style="color: var(--text-muted);">Loading assigned papers...</p></div>
-        </div>
-      </section>
-
-      <!-- VIEW 6: SUBMISSION FORM -->
-      <section id="view-submit" class="view-section">
-        <div class="card">
-          <h2>Submit Manuscript to JISD</h2>
-          <form id="manuscriptForm">
-            <div class="form-group"><label>Title *</label><input type="text" id="m_title" required></div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label>Domain *</label>
-                <select id="m_domain" required>
-                  <option>Natural & Computational Sciences</option>
-                  <option>Health Sciences</option>
-                  <option>Engineering & Technology</option>
-                  <option>Social Sciences & Humanities</option>
-                  <option>Business & Economics</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Type *</label>
-                <select id="m_type" required>
-                  <option>Original Research Article</option>
-                  <option>Review Article</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-group"><label>Abstract *</label><textarea id="m_abstract" rows="4" required></textarea></div>
-            <div class="form-group"><label>Keywords *</label><input type="text" id="m_keywords" required></div>
-            <div class="form-group"><label>Manuscript Document (.doc, .docx, .pdf) *</label><input type="file" id="m_file" required></div>
-            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript</button>
-          </form>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- SIDEBAR AUTHENTICATION -->
-    <aside>
-      <div class="card" id="auth-card">
-        <h2>Portal Login</h2>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
-          <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('login')">Sign In</button>
-          <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('register')">Register</button>
-        </div>
-
-        <form id="form-signin" onsubmit="handleSignIn(event)">
-          <div class="form-group"><label>Email Address</label><input type="email" id="login_email" required></div>
-          <div class="form-group"><label>Password</label><input type="password" id="login_pass" required></div>
-          <button type="submit" class="btn-action">Sign In</button>
-          <p style="margin-top: 0.75rem; font-size: 0.8rem; text-align: center;">
-            <a href="#" onclick="toggleAuthTab('reset')" style="color: var(--blue-secondary);">Forgot Password?</a>
-          </p>
-        </form>
-
-        <form id="form-reset" style="display: none;" onsubmit="handlePasswordReset(event)">
-          <div class="form-group"><label>Registered Email</label><input type="email" id="reset_email" required></div>
-          <button type="submit" class="btn-action">Send Password Reset Link</button>
-          <button type="button" class="btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="toggleAuthTab('login')">Back to Sign In</button>
-        </form>
-
-        <form id="form-signup" style="display: none;" onsubmit="handleSignUp(event)">
-          <div class="form-group"><label>Full Name *</label><input type="text" id="reg_name" required></div>
-          <div class="form-group"><label>Affiliation *</label><input type="text" id="reg_affiliation" required></div>
-          <div class="form-group"><label>Role *</label>
-            <select id="reg_role">
-              <option value="Author">Author</option>
-              <option value="Reviewer">Peer Reviewer</option>
-            </select>
-          </div>
-          <div class="form-group"><label>Email Address *</label><input type="email" id="reg_email" required></div>
-          <div class="form-group"><label>Password *</label><input type="password" id="reg_pass" minlength="6" required></div>
-          <button type="submit" class="btn-action">Create Account</button>
-        </form>
-      </div>
-    </aside>
-  </div>
-
-  <footer>
-    <p>&copy; 2026 University of Kabridahar - Journal of Integrative Science Development (JISD)</p>
-  </footer>
-
-  <script>
-    const SUPABASE_URL = "https://lrpcvfytbfkoofxvvbfh.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29meHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let currentUser = null;
-    let userProfile = null;
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        await fetchUserProfile();
-      }
-      loadPublishedArticles();
-    });
-
-    async function fetchUserProfile() {
-      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
-      if (data) {
-        userProfile = data;
-        if (currentUser.email === 'mekuria.tsegaye20@uok.edu.et') userProfile.role = 'Editor';
-        updateUI();
-      }
-    }
-
-    async function handleSignUp(e) {
-      e.preventDefault();
-      const email = document.getElementById('reg_email').value.trim();
-      const password = document.getElementById('reg_pass').value;
-      const fullName = document.getElementById('reg_name').value;
-      const affiliation = document.getElementById('reg_affiliation').value;
-      const role = document.getElementById('reg_role').value;
-
-      const { data, error } = await db.auth.signUp({ email, password });
-      if (error) return alert("Error: " + error.message);
-
-      if (data.user) {
-        await db.from('profiles').insert([{
-          id: data.user.id, full_name: fullName, affiliation: affiliation, email: email, role: role, is_activated: true
-        }]);
-
-        alert(`Account created successfully for: ${email}\nPlease check your inbox to confirm your email before logging in.`);
-        toggleAuthTab('login');
-      }
-    }
-
-    async function handleSignIn(e) {
-      e.preventDefault();
-      const { data, error } = await db.auth.signInWithPassword({
-        email: document.getElementById('login_email').value,
-        password: document.getElementById('login_pass').value
-      });
-
-      if (error) return alert("Sign in failed: " + error.message);
-      currentUser = data.user;
-      await fetchUserProfile();
-    }
-
-    async function handlePasswordReset(e) {
-      e.preventDefault();
-      const email = document.getElementById('reset_email').value.trim();
-      const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-      if (error) alert("Error: " + error.message);
-      else {
-        alert(`Password reset link sent to: ${email}`);
-        toggleAuthTab('login');
-      }
-    }
-
-    function updateUI() {
-      document.getElementById('auth-card').innerHTML = `
-        <h2>User Session</h2>
-        <p><strong>${userProfile.full_name}</strong></p>
-        <p style="font-size:0.8rem; color:var(--text-muted);">${userProfile.email}</p>
-        <p style="font-size:0.85rem; color:var(--navy-primary); margin-bottom: 0.75rem;">Role: <strong>${userProfile.role}</strong></p>
-        <button class="btn-action" onclick="routeToUserPortal()">Open My Portal</button>
-      `;
-
-      document.getElementById('user-display-name').innerText = userProfile.full_name;
-      document.getElementById('user-display-role').innerText = userProfile.role;
-      document.getElementById('user-display-email').innerText = userProfile.email;
-
-      routeToUserPortal();
-    }
-
-    function routeToUserPortal() {
-      if (userProfile.role === 'Editor') {
-        switchView('editor', null);
-        loadEditorDashboard();
-      } else if (userProfile.role === 'Reviewer') {
-        switchView('reviewer', null);
-        loadReviewerDashboard();
-      } else {
-        switchView('dashboard', null);
-        loadUserSubmissions();
-      }
-    }
-
-    // EDITOR FUNCTIONALITY
-    async function loadEditorDashboard() {
-      const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false });
-      const tbody = document.getElementById('editorTableBody');
-
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="padding: 1rem; text-align: center;">No submissions found.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(s => `
-        <tr style="border-bottom: 1px solid var(--border-color);">
-          <td style="padding: 0.5rem; font-weight: bold; color: var(--navy-primary);">${s.manuscript_id}</td>
-          <td style="padding: 0.5rem;"><strong>${s.title}</strong><br><small>${s.author_name}</small></td>
-          <td style="padding: 0.5rem;">
-            <input type="email" placeholder="reviewer@uok.edu.et" value="${s.assigned_reviewer_email || ''}" id="rev_${s.manuscript_id}" style="width: 140px; padding: 2px 4px; font-size: 0.75rem;">
-            <button onclick="assignReviewer('${s.manuscript_id}')" class="btn-secondary" style="padding: 2px 5px; font-size: 0.7rem;">Assign</button>
-          </td>
-          <td style="padding: 0.5rem;">
-            ${s.reviewer_recommendation ? `<strong>Rec:</strong> ${s.reviewer_recommendation}<br>` : ''}
-            ${s.reviewer_file_url ? `<a href="${s.reviewer_file_url}" target="_blank" style="font-size: 0.75rem;">📄 Review File</a>` : 'Pending'}
-          </td>
-          <td style="padding: 0.5rem;">
-            <select onchange="updatePaperStatus('${s.manuscript_id}', this.value)" style="font-size: 0.75rem;">
-              <option value="Submitted" ${s.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-              <option value="Under Review" ${s.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
-              <option value="Accepted" ${s.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
-              <option value="Published" ${s.status === 'Published' ? 'selected' : ''}>Published</option>
-              <option value="Rejected" ${s.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-            </select>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function assignReviewer(manuscriptId) {
-      const email = document.getElementById(`rev_${manuscriptId}`).value.trim();
-      await db.from('submissions').update({ assigned_reviewer_email: email, status: 'Under Review' }).eq('manuscript_id', manuscriptId);
-      alert(`Assigned reviewer (${email}) to manuscript ${manuscriptId}. Status set to 'Under Review'.`);
-      loadEditorDashboard();
-    }
-
-    async function updatePaperStatus(manuscriptId, newStatus) {
-      await db.from('submissions').update({ status: newStatus }).eq('manuscript_id', manuscriptId);
-      alert(`Manuscript ${manuscriptId} updated to ${newStatus}`);
-      loadPublishedArticles();
-    }
-
-    // REVIEWER PORTAL FUNCTIONALITY
-    async function loadReviewerDashboard() {
-      const { data } = await db.from('submissions').select('*').eq('assigned_reviewer_email', userProfile.email);
-      const list = document.getElementById('reviewerAssignmentsList');
-
-      if (!data || data.length === 0) {
-        list.innerHTML = `<p style="color: var(--text-muted);">No manuscripts currently assigned to you for peer review.</p>`;
-        return;
-      }
-
-      list.innerHTML = data.map(paper => `
-        <div class="paper-card">
-          <h3>${paper.title}</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>ID:</strong> ${paper.manuscript_id} | <strong>Domain:</strong> ${paper.domain}</p>
-          <p style="font-size: 0.88rem; margin: 0.5rem 0;"><strong>Abstract:</strong> ${paper.abstract}</p>
-          
-          <div style="margin: 0.75rem 0;">
-            <a href="${paper.file_url}" target="_blank" class="download-btn">📄 Download Manuscript Document</a>
-          </div>
-
-          <div style="background: #F1F5F9; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-            <h4 style="font-size: 0.9rem; color: var(--navy-primary); margin-bottom: 0.5rem;">Submit Review & Recommendation</h4>
-            
-            <div class="form-group">
-              <label>Recommendation</label>
-              <select id="rec_${paper.manuscript_id}">
-                <option value="Accept">Accept</option>
-                <option value="Minor Revisions">Minor Revisions</option>
-                <option value="Major Revisions">Major Revisions</option>
-                <option value="Reject">Reject</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Reviewer Comments / Feedback Box</label>
-              <textarea id="comm_${paper.manuscript_id}" rows="4" placeholder="Type evaluation comments for editor and author...">${paper.reviewer_comments || ''}</textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Upload Annotated/Feedback File (Optional)</label>
-              <input type="file" id="file_${paper.manuscript_id}">
-            </div>
-
-            <button class="btn-action" onclick="submitReviewerFeedback('${paper.manuscript_id}')">Submit Peer Review Report</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function submitReviewerFeedback(manuscriptId) {
-      const recommendation = document.getElementById(`rec_${manuscriptId}`).value;
-      const comments = document.getElementById(`comm_${manuscriptId}`).value;
-      const fileInput = document.getElementById(`file_${manuscriptId}`).files[0];
-
-      let reviewerFileUrl = null;
-
-      if (fileInput) {
-        const filePath = `review_${manuscriptId}_${fileInput.name}`;
-        const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, fileInput);
-        if (!uploadError) {
-          const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
-          reviewerFileUrl = urlData.publicUrl;
+      // Update Lucide icons on render
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
         }
-      }
+      }, [activeSection]);
 
-      const updateData = { reviewer_recommendation: recommendation, reviewer_comments: comments };
-      if (reviewerFileUrl) updateData.reviewer_file_url = reviewerFileUrl;
+      // GitHub Base URL for images
+      const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/your-username/your-repo/main";
 
-      await db.from('submissions').update(updateData).eq('manuscript_id', manuscriptId);
-      alert(`Review submitted successfully for ${manuscriptId}!`);
-      loadReviewerDashboard();
-    }
+      const boardMembers = [
+        {
+          name: "Dr. Mekuria Tsegaye",
+          role: "Editor-in-Chief",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "mekuria.tsegaye20@uok.edu.et",
+          image: `${GITHUB_RAW_BASE}/meku.jpg`,
+          bio: "Leading overall editorial policy, scientific integrity, and publication processes for JISD."
+        },
+        {
+          name: "Mahamed Abdi Wali",
+          role: "RPEDD Director & Board Chair",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "rpedd@uok.edu.et",
+          image: null,
+          bio: "Oversees research publication strategy and university dissemination programs."
+        },
+        {
+          name: "Latamo Lameso Lelamo",
+          role: "Associate Editor / Publication Officer",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "latamo@uok.edu.et",
+          image: null,
+          bio: "Manages technical copyediting, review timelines, and issue coordination."
+        }
+      ];
 
-    // AUTHOR MANUSCRIPT SUBMISSION
-    document.getElementById('manuscriptForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const file = document.getElementById('m_file').files[0];
-      const manuscriptId = `JISD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      const filePath = `${manuscriptId}_${file.name}`;
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-blue-900 text-white shadow-md">
+            <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  Journal of Integrative Science Development (JISD)
+                </h1>
+                <p className="text-xs text-blue-200 mt-0.5">
+                  University of Kabridahar • Research, Publication and Ethics Dissemination Directorate (RPEDD)
+                </p>
+              </div>
+              <div className="hidden sm:block">
+                <span className="bg-blue-800 text-blue-100 text-xs font-medium px-3 py-1 rounded-full border border-blue-700">
+                  ISSN: Pending | Open Access
+                </span>
+              </div>
+            </div>
+          </header>
 
-      const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, file);
-      if (uploadError) return alert("Upload failed: " + uploadError.message);
+          {/* Main Layout Container */}
+          <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+            
+            {/* Sidebar Navigation */}
+            <aside className="w-full md:w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 sticky top-6">
+                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">
+                  Journal Links
+                </h2>
+                <nav className="space-y-1">
+                  {[
+                    { id: 'about', label: 'About JISD', icon: 'book-open' },
+                    { id: 'editorial-board', label: 'Editorial Board', icon: 'users' },
+                    { id: 'aims-scope', label: 'Aims & Scope', icon: 'target' },
+                    { id: 'ethics-policy', label: 'Publication Ethics', icon: 'shield-check' },
+                    { id: 'author-guidelines', label: 'Author Guidelines', icon: 'file-text' },
+                    { id: 'apc-info', label: 'Article Processing Charges', icon: 'dollar-sign' },
+                    { id: 'review-process', label: 'Peer Review Timeline', icon: 'clock' },
+                  ].map((link) => (
+                    <button
+                      key={link.id}
+                      onClick={() => setActiveSection(link.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                        activeSection === link.id
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <i data-lucide={link.icon} className="w-4 h-4"></i>
+                      <span className="truncate">{link.label}</span>
+                    </button>
+                  ))}
+                </nav>
 
-      const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+                <div className="mt-6 pt-4 border-t border-gray-100 px-2">
+                  <a
+                    href="https://github.com/your-username/your-repo"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors"
+                  >
+                    <span>GitHub Repository</span>
+                    <i data-lucide="external-link" className="w-3.5 h-3.5"></i>
+                  </a>
+                </div>
+              </div>
+            </aside>
 
-      await db.from('submissions').insert([{
-        manuscript_id: manuscriptId,
-        user_id: currentUser.id,
-        author_name: userProfile.full_name,
-        author_email: userProfile.email,
-        affiliation: userProfile.affiliation,
-        title: document.getElementById('m_title').value,
-        domain: document.getElementById('m_domain').value,
-        manuscript_type: document.getElementById('m_type').value,
-        abstract: document.getElementById('m_abstract').value,
-        keywords: document.getElementById('m_keywords').value,
-        file_url: urlData.publicUrl,
-        status: 'Submitted'
-      }]);
+            {/* Main Content Area */}
+            <main className="flex-1">
+              {activeSection === 'editorial-board' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <div className="border-b border-gray-200 pb-4 mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Editorial Board</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Journal of Integrative Science Development (JISD)
+                    </p>
+                  </div>
 
-      alert(`Manuscript submitted successfully!\nID: ${manuscriptId}`);
-      document.getElementById('manuscriptForm').reset();
-      routeToUserPortal();
-    });
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {boardMembers.map((member, index) => (
+                      <div 
+                        key={index} 
+                        className="flex flex-col sm:flex-row gap-4 p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:shadow-md transition-shadow"
+                      >
+                        {/* Profile Image with GitHub Raw Integration */}
+                        <div className="flex-shrink-0">
+                          <img
+                            src={member.image || "https://via.placeholder.com/150?text=JISD"}
+                            alt={member.name}
+                            onError={(e) => {
+                              e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(member.name) + "&background=0D8ABC&color=fff";
+                            }}
+                            className="w-24 h-24 rounded-full object-cover border-2 border-blue-600 shadow-sm"
+                          />
+                        </div>
 
-    async function loadUserSubmissions() {
-      const { data } = await db.from('submissions').select('*').eq('user_id', currentUser.id);
-      const tbody = document.getElementById('submissionsTableBody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" style="padding: 1rem; text-align: center;">No submissions found.</td></tr>`;
-        return;
-      }
+                        {/* Details */}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-base font-bold text-gray-900">{member.name}</h3>
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                              <i data-lucide="shield" className="w-3 h-3"></i>
+                              {member.role}
+                            </span>
+                          </div>
 
-      tbody.innerHTML = data.map(sub => `
-        <tr style="border-bottom: 1px solid var(--border-color);">
-          <td style="padding: 0.5rem; font-weight: 700;">${sub.manuscript_id}</td>
-          <td style="padding: 0.5rem;">${sub.title}</td>
-          <td style="padding: 0.5rem;"><span class="status-badge status-${sub.status.replace(/\s+/g, '')}">${sub.status}</span></td>
-        </tr>
-      `).join('');
-    }
+                          <div className="mt-2 space-y-1 text-xs text-gray-600">
+                            <p className="flex items-center gap-1.5">
+                              <i data-lucide="building-2" className="w-3.5 h-3.5 text-gray-400"></i>
+                              {member.affiliation}
+                            </p>
+                            <p className="flex items-center gap-1.5">
+                              <i data-lucide="mail" className="w-3.5 h-3.5 text-gray-400"></i>
+                              <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
+                                {member.email}
+                              </a>
+                            </p>
+                          </div>
 
-    async function loadPublishedArticles() {
-      const { data } = await db.from('submissions').select('*').eq('status', 'Published');
-      const list = document.getElementById('publishedArticlesList');
-      if (!data || data.length === 0) {
-        list.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No published articles found.</p>`;
-        return;
-      }
+                          <p className="mt-3 text-xs text-gray-500 italic">
+                            {member.bio}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-      list.innerHTML = data.map(paper => `
-        <div class="paper-card">
-          <h3>${paper.title}</h3>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">Author: ${paper.author_name} | DOI: ${paper.doi || '10.5281/jisd.2026'}</p>
-          <p style="font-size: 0.88rem; margin: 0.5rem 0;">${paper.abstract}</p>
-          <a href="${paper.file_url}" target="_blank" class="download-btn">📄 Download Paper</a>
+              {activeSection !== 'editorial-board' && (
+                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 text-center py-16">
+                  <i data-lucide="file-text" className="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
+                  <h3 className="text-lg font-bold text-gray-800 capitalize">
+                    {activeSection.replace('-', ' ')}
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
+                    Section content is active. Refer to official JISD guidelines for detailed policies.
+                  </p>
+                </div>
+              )}
+            </main>
+
+          </div>
+
+          {/* Footer */}
+          <footer className="bg-gray-900 text-gray-400 text-xs py-6 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+              <p>© {new Date().getFullYear()} Journal of Integrative Science Development (JISD) • University of Kabridahar</p>
+            </div>
+          </footer>
         </div>
-      `).join('');
+      );
     }
 
-    function switchView(viewId, element) {
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`view-${viewId}`).classList.add('active');
-      if (element) element.classList.add('active');
-    }
-
-    function toggleAuthTab(tab) {
-      document.getElementById('form-signin').style.display = (tab === 'login') ? 'block' : 'none';
-      document.getElementById('form-signup').style.display = (tab === 'register') ? 'block' : 'none';
-      document.getElementById('form-reset').style.display = (tab === 'reset') ? 'block' : 'none';
-    }
-
-    function handlePortalClick() {
-      if (currentUser) routeToUserPortal();
-      else alert("Please sign in or register to access portal.");
-    }
-
-    async function handleLogout() {
-      await db.auth.signOut();
-      location.reload();
-    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
