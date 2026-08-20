@@ -5,624 +5,975 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Journal of Integrative Science Development (JISD) | University of Kabridahar</title>
   
-  <!-- Supabase & EmailJS SDKs -->
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
-  <style>
-    :root {
-      --navy-primary: #002B49;
-      --blue-secondary: #005691;
-      --gold-accent: #D4AF37;
-      --bg-light: #F8FAFC;
-      --card-white: #FFFFFF;
-      --text-dark: #0F172A;
-      --text-muted: #475569;
-      --border-color: #CBD5E1;
-      --success: #166534;
-      --warning: #92400E;
-      --danger: #991B1B;
-      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font-stack); background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
-
-    header { background-color: var(--navy-primary); border-bottom: 4px solid var(--gold-accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .header-container { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    .brand-group { display: flex; align-items: center; gap: 1rem; }
-    .logo-img { height: 50px; width: 50px; object-fit: contain; background: #FFF; border-radius: 50%; padding: 2px; border: 2px solid var(--gold-accent); }
-    .brand-text h1 { color: #FFF; font-size: 1.2rem; font-weight: 700; line-height: 1.2; }
-    .brand-text p { color: #94A3B8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    nav { display: flex; gap: 0.5rem; align-items: center; }
-    .nav-btn { background: none; border: none; color: #E2E8F0; padding: 0.5rem 0.85rem; font-weight: 500; font-size: 0.88rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
-    .nav-btn:hover, .nav-btn.active { color: #FFF; background-color: rgba(255, 255, 255, 0.15); }
-    .btn-portal-cta { background-color: var(--gold-accent); color: var(--navy-primary); font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-
-    .main-layout { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 2.8fr 1.2fr; gap: 2rem; }
-    @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
-
-    .view-section { display: none; }
-    .view-section.active { display: block; }
-    .card { background: var(--card-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .card h2 { color: var(--navy-primary); font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 2px solid var(--bg-light); padding-bottom: 0.5rem; }
-
-    .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy-primary); margin-bottom: 0.35rem; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; font-family: inherit; }
-    
-    .btn-action { background-color: var(--navy-primary); color: #FFF; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 0.5rem; }
-    .btn-action:hover { background-color: var(--blue-secondary); }
-    .btn-secondary { background-color: #E2E8F0; color: var(--text-dark); border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; border-radius: 4px; cursor: pointer; margin-bottom: 0.5rem; }
-
-    .paper-card { border: 1px solid var(--border-color); border-left: 4px solid var(--navy-primary); padding: 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; background: #FFF; }
-    .paper-card h3 { font-size: 1.1rem; color: var(--navy-primary); margin-bottom: 0.4rem; }
-    .paper-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
-    .paper-badge { background: #E0F2FE; color: var(--blue-secondary); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
-    .download-btn { display: inline-flex; align-items: center; gap: 0.4rem; background-color: var(--gold-accent); color: var(--navy-primary); padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-decoration: none; }
-
-    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-    .status-Submitted { background-color: #FEF3C7; color: var(--warning); }
-    .status-UnderReview { background-color: #E0F2FE; color: var(--blue-secondary); }
-    .status-Accepted { background-color: #DCFCE7; color: var(--success); }
-    .status-Published { background-color: #059669; color: #FFF; }
-    .status-Rejected { background-color: #FEE2E2; color: var(--danger); }
-    
-    .user-banner { background: #E0F2FE; border-left: 4px solid var(--blue-secondary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-
-    footer { background: var(--navy-primary); color: #94A3B8; text-align: center; padding: 1.5rem; font-size: 0.85rem; border-top: 4px solid var(--gold-accent); margin-top: 3rem; }
-  </style>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-gray-50 font-sans text-gray-800 antialiased selection:bg-blue-900 selection:text-white">
 
-  <header>
-    <div class="header-container">
-      <div class="brand-group">
-        <img src="uok-logo.png" alt="UoK Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100/002B49/FFF?text=UoK'">
-        <img src="jisd-logo.png" alt="JISD Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/100/005691/FFF?text=JISD'">
-        <div class="brand-text">
-          <h1>UoK - JISD</h1>
-          <p>Journal of Integrative Science Development | University of Kabridahar</p>
-        </div>
-      </div>
-      <nav id="top-nav-bar">
-        <button class="nav-btn active" onclick="switchView('home', this)">Home</button>
-        <button class="nav-btn" onclick="switchView('published', this)">Articles</button>
-        <button class="nav-btn" onclick="switchView('guidelines', this)">Author Guidelines</button>
-        <button class="btn-portal-cta" id="nav-portal-btn" onclick="handlePortalClick()">Portal Dashboard</button>
-      </nav>
-    </div>
-  </header>
+  <div id="root"></div>
 
-  <div class="main-layout">
-    <main>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-      <!-- VIEW 1: HOME -->
-      <section id="view-home" class="view-section active">
-        <div class="card">
-          <h2>About the Journal</h2>
-          <p>The <strong>Journal of Integrative Science Development (JISD)</strong> is a multi-disciplinary academic platform hosted by the University of Kabridahar. We publish original research, field studies, and critical reviews across diverse scientific domains.</p>
-        </div>
-
-        <div class="card">
-          <h2>Current Volume Highlights</h2>
-          <div id="homeFeaturedArticles"><p style="color: var(--text-muted);">Loading current issue...</p></div>
-        </div>
-      </section>
-
-      <!-- VIEW 2: PUBLISHED ARTICLES ARCHIVE -->
-      <section id="view-published" class="view-section">
-        <div class="card">
-          <h2>Published Articles Library</h2>
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-            <input type="text" id="paperSearch" placeholder="Search by title, author, abstract..." onkeyup="filterArticles()">
-            <select id="domainFilter" onchange="filterArticles()">
-              <option value="ALL">All Academic Domains</option>
-              <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
-              <option value="Business & Economics">Business & Economics</option>
-              <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
-              <option value="Engineering & Technology">Engineering & Technology</option>
-              <option value="Health Sciences">Health Sciences</option>
-            </select>
-          </div>
-          <div id="publishedArticlesList"><p style="text-align: center; color: var(--text-muted);">Loading papers archive...</p></div>
-        </div>
-      </section>
-
-      <!-- VIEW 3: GUIDELINES -->
-      <section id="view-guidelines" class="view-section">
-        <div class="card">
-          <h2>Author Guidelines & Peer-Review Policy</h2>
-          <ul style="padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>Peer Review Process:</strong> All submitted manuscripts undergo double-blind peer review.</li>
-            <li><strong>File Format:</strong> Microsoft Word (`.doc`, `.docx`) format required.</li>
-            <li><strong>Anonymity:</strong> Ensure author names and institution details are removed from the submitted manuscript file.</li>
-            <li><strong>Editorial Contact:</strong> Official queries should be sent to <a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>.</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- VIEW 4: AUTHOR DASHBOARD -->
-      <section id="view-dashboard" class="view-section">
-        <div class="user-banner">
-          <div>
-            <strong id="user-display-name">Author Account</strong> (<span id="user-display-role">Author</span>)
-            <p id="user-display-email" style="font-size: 0.8rem; color: var(--text-muted);"></p>
-          </div>
-          <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2 style="color: var(--navy-primary);">Your Submissions</h2>
-          <button class="btn-portal-cta" onclick="switchView('submit', null)">+ Submit New Manuscript</button>
-        </div>
-
-        <div class="card">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <thead>
-              <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                <th style="padding: 0.5rem;">Manuscript ID</th>
-                <th style="padding: 0.5rem;">Title</th>
-                <th style="padding: 0.5rem;">Domain</th>
-                <th style="padding: 0.5rem;">Status</th>
-              </tr>
-            </thead>
-            <tbody id="submissionsTableBody">
-              <tr><td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">Loading your submissions...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- VIEW 5: EDITORIAL CONTROL PANEL -->
-      <section id="view-editor" class="view-section">
-        <div class="card" style="background: #FEF3C7; border-color: #F59E0B;">
-          <h2 style="color: #92400E;">Editorial Control Panel</h2>
-          <p style="font-size: 0.85rem;">Manage platform submissions, query manuscripts by ID, download submission files, and update publication statuses.</p>
-        </div>
-
-        <div class="card">
-          <h2>Manuscript ID Search</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="editorSearchId" placeholder="Enter Manuscript ID (e.g. JISD-2026-4821)">
-            <button class="btn-portal-cta" onclick="searchManuscriptById()">Find Manuscript</button>
-          </div>
-          <div id="searchResultDisplay" style="margin-top: 1rem;"></div>
-        </div>
-
-        <div class="card">
-          <h2>All Submitted Manuscripts</h2>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-              <thead>
-                <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                  <th style="padding: 0.5rem;">ID</th>
-                  <th style="padding: 0.5rem;">Author</th>
-                  <th style="padding: 0.5rem;">Title</th>
-                  <th style="padding: 0.5rem;">Status</th>
-                  <th style="padding: 0.5rem;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="editorTableBody">
-                <tr><td colspan="5" style="padding: 1rem; text-align: center;">Loading all submissions...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW 6: SUBMISSION FORM -->
-      <section id="view-submit" class="view-section">
-        <div class="card">
-          <h2>Submit Manuscript to JISD</h2>
-          <form id="manuscriptForm">
-            <div class="form-group">
-              <label>Manuscript Title *</label>
-              <input type="text" id="m_title" required placeholder="Full academic manuscript title">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label>Academic Domain *</label>
-                <select id="m_domain" required>
-                  <option value="" disabled selected>Select domain...</option>
-                  <option>Social Sciences & Humanities</option>
-                  <option>Business & Economics</option>
-                  <option>Natural & Computational Sciences</option>
-                  <option>Engineering & Technology</option>
-                  <option>Health Sciences</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Manuscript Type *</label>
-                <select id="m_type" required>
-                  <option>Original Research Article</option>
-                  <option>Review Article</option>
-                  <option>Case Study</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Abstract (max 300 words) *</label>
-              <textarea id="m_abstract" rows="5" required></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Keywords *</label>
-              <input type="text" id="m_keywords" placeholder="e.g. Dryland Farming, Hydrology, Ethiopia" required>
-            </div>
-
-            <div class="form-group">
-              <label>Upload Anonymized Manuscript File (.doc, .docx) *</label>
-              <input type="file" id="m_file" accept=".doc,.docx" required>
-            </div>
-
-            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript to JISD</button>
-            <button type="button" class="btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="switchView('dashboard', null)">Cancel</button>
-          </form>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- SIDEBAR AUTHENTICATION & OTP ACTIVATION -->
-    <aside>
-      <div class="card" id="auth-card">
-        <h2>Author Access</h2>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
-          <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('login')">Sign In</button>
-          <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('register')">Register</button>
-        </div>
-
-        <form id="form-signin" onsubmit="handleSignIn(event)">
-          <div class="form-group"><label>Email Address</label><input type="email" id="login_email" required></div>
-          <div class="form-group"><label>Password</label><input type="password" id="login_pass" required></div>
-          <button type="submit" class="btn-action">Sign In to Dashboard</button>
-        </form>
-
-        <form id="form-signup" style="display: none;" onsubmit="handleSignUp(event)">
-          <div class="form-group"><label>Full Name *</label><input type="text" id="reg_name" required></div>
-          <div class="form-group"><label>Affiliation *</label><input type="text" id="reg_affiliation" placeholder="University / Institute" required></div>
-          <div class="form-group"><label>Email Address *</label><input type="email" id="reg_email" required></div>
-          <div class="form-group"><label>Password *</label><input type="password" id="reg_pass" minlength="6" required></div>
-          <button type="submit" class="btn-action">Register Account</button>
-        </form>
-
-        <div id="otp-activation-box" style="display: none; margin-top: 1rem; padding: 1rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 6px;">
-          <h3 style="font-size: 0.9rem; color: #92400E; margin-bottom: 0.5rem;">Account Activation Required</h3>
-          <p style="font-size: 0.78rem; margin-bottom: 0.5rem;">Enter the 6-digit code sent to your email:</p>
-          <input type="text" id="otp_code_input" placeholder="123456" maxlength="6" style="width: 100%; padding: 0.5rem; text-align: center; font-weight: bold; margin-bottom: 0.5rem;">
-          <button class="btn-action" onclick="verifyActivationCode()">Activate Account</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Editorial Office</h2>
-        <p style="font-size: 0.85rem;"><strong>Editor-in-Chief:</strong><br>Dr. Mekuria Tsegaye</p>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
-          <strong>Submissions Email:</strong><br><a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>
-        </p>
-      </div>
-    </aside>
-  </div>
-
-  <footer>
-    <p>&copy; 2026 University of Kabridahar - Journal of Integrative Science Development (UoK - JISD). All rights reserved.</p>
-  </footer>
-
-  <script>
+    // Supabase Client Initializer
     const SUPABASE_URL = "https://lrpcvfytbfkoofxvvbfh.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29feHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29meHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let currentUser = null;
-    let userProfile = null;
-    let allPublishedArticles = [];
-    let allSubmissions = [];
+    const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/your-username/your-repo/main";
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await db.auth.getSession();
-      if (session) {
-        currentUser = session.user;
-        await fetchUserProfile();
-      }
-      loadPublishedArticles();
-    });
+    function App() {
+      const [activeTab, setActiveTab] = useState('published-articles');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [userProfile, setUserProfile] = useState(null);
+      
+      // Auth Modal States
+      const [showAuthModal, setShowAuthModal] = useState(false);
+      const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'reset'
+      const [authEmail, setAuthEmail] = useState('');
+      const [authPassword, setAuthPassword] = useState('');
+      const [regFullName, setRegFullName] = useState('');
+      const [regAffiliation, setRegAffiliation] = useState('University of Kabridahar');
+      const [regRole, setRegRole] = useState('Author');
+      const [authError, setAuthError] = useState('');
+      const [authMessage, setAuthMessage] = useState('');
+      const [isSubmitting, setIsSubmitting] = useState(false);
 
-    async function fetchUserProfile() {
-      const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
-      if (data) {
-        userProfile = data;
-        updateUIForAuthenticatedUser();
-      }
-    }
+      // Data States
+      const [submissions, setSubmissions] = useState([]);
+      const [selectedCategory, setSelectedCategory] = useState('All');
+      const [searchQuery, setSearchQuery] = useState('');
 
-    function switchView(viewName, element) {
-      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-      const targetView = document.getElementById(`view-${viewName}`);
-      if (targetView) targetView.classList.add('active');
-
-      if (element) {
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
-      }
-    }
-
-    function handlePortalClick() {
-      if (!currentUser) {
-        alert("Please sign in or register to access the portal.");
-        return;
-      }
-      switchView(userProfile && userProfile.role === 'Editor' ? 'editor' : 'dashboard', null);
-    }
-
-    function toggleAuthTab(tab) {
-      document.getElementById('form-signin').style.display = tab === 'login' ? 'block' : 'none';
-      document.getElementById('form-signup').style.display = tab === 'register' ? 'block' : 'none';
-    }
-
-    async function handleLogout() {
-      await db.auth.signOut();
-      location.reload();
-    }
-
-    async function handleSignUp(e) {
-      e.preventDefault();
-      const email = document.getElementById('reg_email').value;
-      const password = document.getElementById('reg_pass').value;
-      const fullName = document.getElementById('reg_name').value;
-      const affiliation = document.getElementById('reg_affiliation').value;
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-      const { data, error } = await db.auth.signUp({ email, password });
-      if (error) return alert("Registration failed: " + error.message);
-
-      if (data.user) {
-        await db.from('profiles').insert([{
-          id: data.user.id, full_name: fullName, affiliation: affiliation, email: email, activation_code: otpCode, is_activated: false
-        }]);
-        alert(`Account registered!\nActivation Code: ${otpCode}`);
-        document.getElementById('otp-activation-box').style.display = 'block';
-      }
-    }
-
-    async function verifyActivationCode() {
-      const code = document.getElementById('otp_code_input').value.trim();
-      if (userProfile && userProfile.activation_code === code) {
-        await db.from('profiles').update({ is_activated: true }).eq('id', currentUser.id);
-        alert("Account activated successfully!");
-        location.reload();
-      } else {
-        alert("Invalid activation code.");
-      }
-    }
-
-    async function handleSignIn(e) {
-      e.preventDefault();
-      const { data, error } = await db.auth.signInWithPassword({
-        email: document.getElementById('login_email').value,
-        password: document.getElementById('login_pass').value
+      // Submission Form State
+      const [formData, setFormData] = useState({
+        title: '',
+        abstract: '',
+        keywords: '',
+        category: 'Natural & Computational Sciences',
+        manuscript_type: 'Original Research',
+        file: null
       });
 
-      if (error) return alert("Sign in failed: " + error.message);
-      currentUser = data.user;
-      await fetchUserProfile();
-      switchView(userProfile && userProfile.role === 'Editor' ? 'editor' : 'dashboard', null);
-    }
+      // Peer Review Form State Map
+      const [reviewData, setReviewData] = useState({});
 
-    function updateUIForAuthenticatedUser() {
-      document.getElementById('auth-card').innerHTML = `
-        <h2>Account Active</h2>
-        <p><strong>${userProfile.full_name}</strong></p>
-        <p style="font-size:0.8rem; color:var(--text-muted);">${userProfile.email}</p>
-        <p style="font-size:0.8rem; color:var(--navy-primary); margin-bottom: 0.75rem;">Role: <strong>${userProfile.role}</strong></p>
-        <button class="btn-action" onclick="switchView('${userProfile.role === 'Editor' ? 'editor' : 'dashboard'}', null)">Open Portal</button>
-      `;
+      useEffect(() => {
+        initSession();
+        fetchSubmissions();
+      }, []);
 
-      document.getElementById('user-display-name').innerText = userProfile.full_name;
-      document.getElementById('user-display-role').innerText = userProfile.role;
-      document.getElementById('user-display-email').innerText = userProfile.email;
-
-      if (userProfile.role === 'Editor') {
-        const topNav = document.getElementById('top-nav-bar');
-        if (!document.getElementById('nav-editor-btn')) {
-          topNav.innerHTML += `<button class="nav-btn" id="nav-editor-btn" onclick="switchView('editor', this)">Editorial Board</button>`;
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
         }
-        loadEditorDashboard();
-      }
+      }, [activeTab, currentUser, userProfile, showAuthModal, submissions, selectedCategory, searchQuery, reviewData]);
 
-      loadUserSubmissions();
-    }
+      const initSession = async () => {
+        const { data: { session } } = await db.auth.getSession();
+        if (session?.user) {
+          setCurrentUser(session.user);
+          await loadUserProfile(session.user.id, session.user.email);
+        }
+      };
 
-    async function loadPublishedArticles() {
-      const { data } = await db.from('submissions').select('*').eq('status', 'Published').order('created_at', { ascending: false });
-      allPublishedArticles = data || [];
-      renderArticles(allPublishedArticles);
+      const loadUserProfile = async (userId, email) => {
+        const { data, error } = await db.from('profiles').select('*').eq('id', userId).single();
+        if (data) {
+          let profile = data;
+          if (email === 'mekuria.tsegaye20@uok.edu.et') profile.role = 'Editor';
+          setUserProfile(profile);
+        }
+      };
 
-      const homeList = document.getElementById('homeFeaturedArticles');
-      if (allPublishedArticles.length === 0) {
-        homeList.innerHTML = `<p style="color: var(--text-muted);">No published articles yet.</p>`;
-      } else {
-        homeList.innerHTML = allPublishedArticles.slice(0, 2).map(art => `
-          <div class="paper-card">
-            <h3>${art.title}</h3>
-            <div class="paper-meta">
-              <span><strong>Authors:</strong> ${art.author_name}</span>
-              <span class="paper-badge">${art.domain}</span>
-            </div>
-            <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">${art.abstract}</p>
-            <a href="${art.file_url}" target="_blank" class="download-btn">Download Manuscript</a>
-          </div>
-        `).join('');
-      }
-    }
+      const fetchSubmissions = async () => {
+        const { data, error } = await db.from('submissions').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+          setSubmissions(data);
+        }
+      };
 
-    function renderArticles(articles) {
-      const archiveList = document.getElementById('publishedArticlesList');
-      if (articles.length === 0) {
-        archiveList.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No matching articles found.</p>`;
-        return;
-      }
-      archiveList.innerHTML = articles.map(art => `
-        <div class="paper-card">
-          <h3>${art.title}</h3>
-          <div class="paper-meta">
-            <span><strong>Author:</strong> ${art.author_name} (${art.affiliation})</span>
-            <span class="paper-badge">${art.domain}</span>
-          </div>
-          <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">${art.abstract}</p>
-          <a href="${art.file_url}" target="_blank" class="download-btn">Download Manuscript</a>
-        </div>
-      `).join('');
-    }
+      // Auth Handlers
+      const handleAuthSubmit = async (e) => {
+        e.preventDefault();
+        setAuthError('');
+        setAuthMessage('');
+        setIsSubmitting(true);
 
-    function filterArticles() {
-      const query = document.getElementById('paperSearch').value.toLowerCase();
-      const domain = document.getElementById('domainFilter').value;
+        try {
+          if (authMode === 'login') {
+            const { data, error } = await db.auth.signInWithPassword({ email: authEmail, password: authPassword });
+            if (error) throw error;
+            setCurrentUser(data.user);
+            await loadUserProfile(data.user.id, data.user.email);
+            setShowAuthModal(false);
+          } else if (authMode === 'register') {
+            const { data, error } = await db.auth.signUp({
+              email: authEmail,
+              password: authPassword,
+              options: {
+                data: { full_name: regFullName, affiliation: regAffiliation, role: regRole }
+              }
+            });
+            if (error) throw error;
+            setAuthMessage('Account registered successfully! Please sign in.');
+            setAuthMode('login');
+          } else if (authMode === 'reset') {
+            const { error } = await db.auth.resetPasswordForEmail(authEmail, { redirectTo: window.location.href });
+            if (error) throw error;
+            setAuthMessage('Password reset link sent to your email.');
+          }
+        } catch (err) {
+          setAuthError(err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
 
-      const filtered = allPublishedArticles.filter(art => {
-        const matchesQuery = art.title.toLowerCase().includes(query) || art.author_name.toLowerCase().includes(query);
-        const matchesDomain = domain === 'ALL' || art.domain === domain;
-        return matchesQuery && matchesDomain;
+      const handleLogout = async () => {
+        await db.auth.signOut();
+        setCurrentUser(null);
+        setUserProfile(null);
+        setActiveTab('published-articles');
+      };
+
+      // Manuscript Submission Handler
+      const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        if (!currentUser || !userProfile) {
+          alert("Please sign in to submit a manuscript.");
+          setShowAuthModal(true);
+          return;
+        }
+
+        if (!formData.file) {
+          alert("Please upload your manuscript file.");
+          return;
+        }
+
+        setIsSubmitting(true);
+        try {
+          const file = formData.file;
+          const manuscriptId = `JISD-2026-${Math.floor(100 + Math.random() * 900)}`;
+          const filePath = `${manuscriptId}_${Date.now()}_${file.name}`;
+
+          const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, file);
+          if (uploadError) throw uploadError;
+
+          const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+
+          const newPayload = {
+            manuscript_id: manuscriptId,
+            user_id: currentUser.id,
+            author_name: userProfile.full_name,
+            author_email: userProfile.email,
+            affiliation: userProfile.affiliation,
+            title: formData.title,
+            abstract: formData.abstract,
+            keywords: formData.keywords,
+            category: formData.category,
+            manuscript_type: formData.manuscript_type,
+            file_url: urlData.publicUrl,
+            status: 'Submitted'
+          };
+
+          const { error: insertError } = await db.from('submissions').insert([newPayload]);
+          if (insertError) throw insertError;
+
+          alert(`Manuscript Submitted Successfully!\nTracking ID: ${manuscriptId}`);
+          setFormData({
+            title: '', abstract: '', keywords: '', category: 'Natural & Computational Sciences',
+            manuscript_type: 'Original Research', file: null
+          });
+          await fetchSubmissions();
+          setActiveTab('author-portal');
+        } catch (err) {
+          alert("Submission Error: " + err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
+      // Editor Actions
+      const handleAssignReviewer = async (manuscriptId, email) => {
+        if (!email) return;
+        const { error } = await db.from('submissions').update({
+          assigned_reviewer_email: email,
+          status: 'Under Review'
+        }).eq('manuscript_id', manuscriptId);
+
+        if (!error) {
+          alert(`Reviewer assigned: ${email}`);
+          fetchSubmissions();
+        }
+      };
+
+      const handleUpdateStatus = async (manuscriptId, status) => {
+        const { error } = await db.from('submissions').update({ status }).eq('manuscript_id', manuscriptId);
+        if (!error) {
+          alert(`Status updated to ${status}`);
+          fetchSubmissions();
+        }
+      };
+
+      // Reviewer Actions
+      const handleReviewSubmit = async (manuscriptId) => {
+        const state = reviewData[manuscriptId] || {};
+        let reviewerFileUrl = null;
+
+        if (state.file) {
+          const filePath = `review_${manuscriptId}_${Date.now()}_${state.file.name}`;
+          const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, state.file);
+          if (!uploadError) {
+            const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+            reviewerFileUrl = urlData.publicUrl;
+          }
+        }
+
+        const updatePayload = {
+          reviewer_recommendation: state.recommendation || 'Accept',
+          reviewer_comments: state.comments || ''
+        };
+
+        if (reviewerFileUrl) updatePayload.reviewer_file_url = reviewerFileUrl;
+
+        const { error } = await db.from('submissions').update(updatePayload).eq('manuscript_id', manuscriptId);
+        if (!error) {
+          alert(`Peer Review Report submitted for ${manuscriptId}`);
+          fetchSubmissions();
+        }
+      };
+
+      // Filtered Published Papers
+      const publishedArticles = submissions.filter(s => {
+        const matchesCategory = selectedCategory === 'All' || s.category === selectedCategory;
+        const matchesSearch = (s.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              (s.abstract || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              (s.author_name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        return s.status === 'Published' && matchesCategory && matchesSearch;
       });
 
-      renderArticles(filtered);
-    }
+      const boardMembers = [
+        {
+          name: "Dr. Mekuria Tsegaye",
+          role: "Editor-in-Chief",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "mekuria.tsegaye20@uok.edu.et",
+          bio: "Directs publication strategy, editorial policies, and double-blind peer review execution."
+        },
+        {
+          name: "Mahamed Abdi Wali",
+          role: "RPEDD Director & Board Chair",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "rpedd@uok.edu.et",
+          bio: "Leads research publication dissemination across university faculties."
+        },
+        {
+          name: "Latamo Lameso Lelamo",
+          role: "Associate Editor / Managing Officer",
+          affiliation: "University of Kabridahar, Ethiopia",
+          email: "latamo@uok.edu.et",
+          bio: "Oversees manuscript workflow, reviewer assignments, and copyediting."
+        }
+      ];
 
-    document.getElementById('manuscriptForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true; btn.innerText = "Uploading Manuscript File...";
+      return (
+        <div className="min-h-screen flex flex-col bg-gray-50">
+          
+          {/* HEADER */}
+          <header className="bg-slate-900 text-white border-b-4 border-amber-500 shadow-md sticky top-0 z-40">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('published-articles')}>
+                <img 
+                  src={`${GITHUB_RAW_BASE}/uok-logo.png`} 
+                  alt="UOK Logo" 
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/50/002B49/FFF?text=UoK"; }}
+                  className="h-12 w-12 object-contain rounded-full bg-white p-1 border-2 border-amber-500"
+                />
+                <div>
+                  <h1 className="text-lg font-bold tracking-tight leading-tight">
+                    Journal of Integrative Science Development (JISD)
+                  </h1>
+                  <p className="text-xs text-slate-300">
+                    University of Kabridahar • RPEDD Directorate
+                  </p>
+                </div>
+              </div>
 
-      try {
-        const file = document.getElementById('m_file').files[0];
-        const manuscriptId = `JISD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-        const filePath = `${manuscriptId}_${file.name}`;
+              <div className="flex items-center gap-3">
+                {currentUser && userProfile ? (
+                  <div className="flex items-center gap-3 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-md">
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-amber-400">{userProfile.full_name}</p>
+                      <p className="text-[10px] text-slate-300 capitalize">{userProfile.role} Portal</p>
+                    </div>
+                    <button 
+                      onClick={handleLogout}
+                      className="text-xs bg-red-600 hover:bg-red-700 text-white font-semibold px-2.5 py-1 rounded transition"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => { setAuthMode('login'); setShowAuthModal(true); }}
+                    className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-4 py-2 rounded shadow transition"
+                  >
+                    <i data-lucide="lock" className="w-3.5 h-3.5"></i>
+                    Portal Login / Register
+                  </button>
+                )}
+              </div>
 
-        const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, file);
-        if (uploadError) throw uploadError;
+            </div>
+          </header>
 
-        const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+          {/* MAIN CONTAINER */}
+          <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+            
+            {/* SIDEBAR NAVIGATION */}
+            <aside className="w-full md:w-64 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 space-y-1">
+                <span className="text-[11px] font-bold text-slate-400 uppercase px-2 mb-1 block">Public Journal</span>
+                
+                {[
+                  { id: 'published-articles', label: 'Published Articles', icon: 'book-open' },
+                  { id: 'about', label: 'About JISD', icon: 'info' },
+                  { id: 'editorial-board', label: 'Editorial Board', icon: 'users' },
+                  { id: 'aims-scope', label: 'Aims & Scope', icon: 'target' },
+                  { id: 'author-guidelines', label: 'Author Guidelines', icon: 'file-text' },
+                ].map(nav => (
+                  <button
+                    key={nav.id}
+                    onClick={() => setActiveTab(nav.id)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-md transition ${
+                      activeTab === nav.id ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <i data-lucide={nav.icon} className="w-4 h-4"></i>
+                    <span>{nav.label}</span>
+                  </button>
+                ))}
 
-        const { error: dbError } = await db.from('submissions').insert([{
-          manuscript_id: manuscriptId,
-          user_id: currentUser ? currentUser.id : null,
-          author_name: userProfile ? userProfile.full_name : "Author",
-          author_email: currentUser ? currentUser.email : "author@uok.edu.et",
-          affiliation: userProfile ? userProfile.affiliation : "University of Kabridahar",
-          title: document.getElementById('m_title').value,
-          domain: document.getElementById('m_domain').value,
-          manuscript_type: document.getElementById('m_type').value,
-          abstract: document.getElementById('m_abstract').value,
-          keywords: document.getElementById('m_keywords').value,
-          file_url: urlData.publicUrl,
-          status: 'Submitted'
-        }]);
+                <div className="pt-3 mt-3 border-t border-slate-200">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase px-2 mb-1 block">Workspaces</span>
+                  
+                  <button
+                    onClick={() => setActiveTab('submit-paper')}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-md transition ${
+                      activeTab === 'submit-paper' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <i data-lucide="upload-cloud" className="w-4 h-4"></i>
+                    <span>Submit Manuscript</span>
+                  </button>
 
-        if (dbError) throw dbError;
+                  {currentUser && (
+                    <>
+                      <button
+                        onClick={() => setActiveTab('author-portal')}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-md transition ${
+                          activeTab === 'author-portal' ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        <i data-lucide="layout-dashboard" className="w-4 h-4"></i>
+                        <span>Author Submissions</span>
+                      </button>
 
-        alert(`Manuscript submitted successfully!\nID: ${manuscriptId}`);
-        document.getElementById('manuscriptForm').reset();
-        loadUserSubmissions();
-        switchView('dashboard', null);
-      } catch (err) {
-        alert("Submission failed: " + err.message);
-      } finally {
-        btn.disabled = false; btn.innerText = "Submit Manuscript to JISD";
-      }
-    });
+                      {(userProfile?.role === 'Reviewer' || userProfile?.role === 'Editor') && (
+                        <button
+                          onClick={() => setActiveTab('reviewer-portal')}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-md transition ${
+                            activeTab === 'reviewer-portal' ? 'bg-blue-800 text-white' : 'text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <i data-lucide="check-square" className="w-4 h-4"></i>
+                          <span>Reviewer Workspace</span>
+                        </button>
+                      )}
 
-    async function loadUserSubmissions() {
-      if (!currentUser) return;
-      const { data } = await db.from('submissions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-      const tbody = document.getElementById('submissionsTableBody');
+                      {userProfile?.role === 'Editor' && (
+                        <button
+                          onClick={() => setActiveTab('editor-portal')}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-md transition mt-2 ${
+                            activeTab === 'editor-portal' ? 'bg-emerald-700 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                          }`}
+                        >
+                          <i data-lucide="sliders" className="w-4 h-4"></i>
+                          <span>Editor Control Panel</span>
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </aside>
 
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="padding: 1rem; text-align: center;">No submissions found.</td></tr>`;
-        return;
-      }
+            {/* DYNAMIC VIEW CONTENT */}
+            <main className="flex-1">
 
-      tbody.innerHTML = data.map(sub => `
-        <tr style="border-bottom: 1px solid var(--border-color);">
-          <td style="padding: 0.5rem; font-weight: 700;">${sub.manuscript_id}</td>
-          <td style="padding: 0.5rem;">${sub.title}</td>
-          <td style="padding: 0.5rem;">${sub.domain}</td>
-          <td style="padding: 0.5rem;"><span class="status-badge status-${sub.status.replace(/\s+/g, '')}">${sub.status}</span></td>
-        </tr>
-      `).join('');
-    }
+              {/* VIEW 1: PUBLISHED ARTICLES */}
+              {activeTab === 'published-articles' && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                  <div className="border-b border-slate-200 pb-4 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Published Research Articles</h2>
+                      <p className="text-xs text-slate-500">Peer-reviewed open-access repository</p>
+                    </div>
+                    <span className="text-xs bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-full border border-amber-300">
+                      Volume 1 • Issue 1 (2026)
+                    </span>
+                  </div>
 
-    async function loadEditorDashboard() {
-      const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false });
-      allSubmissions = data || [];
-      renderEditorTable(allSubmissions);
-    }
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    <input 
+                      type="text"
+                      placeholder="Search title, abstract, or author..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="md:col-span-2 text-xs p-2.5 border border-slate-300 rounded-md focus:ring-2 focus:ring-slate-900 outline-none"
+                    />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="text-xs p-2.5 border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-slate-900 outline-none"
+                    >
+                      <option value="All">All Disciplines</option>
+                      <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+                      <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
+                      <option value="Business & Economics">Business & Economics</option>
+                      <option value="Engineering & Technology">Engineering & Technology</option>
+                      <option value="Health Sciences">Health Sciences</option>
+                    </select>
+                  </div>
 
-    function renderEditorTable(submissions) {
-      const tbody = document.getElementById('editorTableBody');
-      if (submissions.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="padding: 1rem; text-align: center;">No submissions located.</td></tr>`;
-        return;
-      }
+                  <div className="space-y-4">
+                    {publishedArticles.length === 0 ? (
+                      <p className="text-xs text-slate-500 text-center py-10">No published articles match your criteria.</p>
+                    ) : (
+                      publishedArticles.map(article => (
+                        <div key={article.id} className="p-4 border-l-4 border-slate-900 border-y border-r border-slate-200 rounded-r-md hover:shadow-md transition bg-white">
+                          <div className="flex gap-2 mb-2 flex-wrap items-center">
+                            <span className="text-[10px] bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded border border-slate-300">
+                              {article.category}
+                            </span>
+                            <span className="text-[10px] text-amber-700 font-mono font-semibold">DOI: {article.doi || '10.5281/jisd.2026'}</span>
+                          </div>
+                          <h3 className="text-base font-bold text-slate-900 hover:text-blue-900 cursor-pointer">
+                            {article.title}
+                          </h3>
+                          <p className="text-xs text-slate-600 font-medium my-1">
+                            Author: {article.author_name} ({article.affiliation})
+                          </p>
+                          <p className="text-xs text-slate-600 line-clamp-3 mb-3">{article.abstract}</p>
+                          <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-100">
+                            <span className="text-slate-400">Published: {new Date(article.created_at).toLocaleDateString()}</span>
+                            <a 
+                              href={article.file_url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded transition"
+                            >
+                              <i data-lucide="download" className="w-3.5 h-3.5"></i> Download PDF
+                            </a>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
 
-      tbody.innerHTML = submissions.map(sub => `
-        <tr style="border-bottom: 1px solid var(--border-color);">
-          <td style="padding: 0.5rem; font-weight: bold;">${sub.manuscript_id}</td>
-          <td style="padding: 0.5rem;">${sub.author_name}</td>
-          <td style="padding: 0.5rem;">${sub.title}</td>
-          <td style="padding: 0.5rem;">
-            <select onchange="updateSubmissionStatus('${sub.manuscript_id}', this.value)">
-              <option ${sub.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-              <option ${sub.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
-              <option ${sub.status === 'Revision Required' ? 'selected' : ''}>Revision Required</option>
-              <option ${sub.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
-              <option ${sub.status === 'Published' ? 'selected' : ''}>Published</option>
-              <option ${sub.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-            </select>
-          </td>
-          <td style="padding: 0.5rem;">
-            <a href="${sub.file_url}" target="_blank" class="download-btn">File</a>
-          </td>
-        </tr>
-      `).join('');
-    }
+              {/* VIEW 2: AUTHOR SUBMISSION WORKSPACE */}
+              {activeTab === 'submit-paper' && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                  <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4">Submit Manuscript to JISD</h2>
+                  
+                  {!currentUser ? (
+                    <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-xs text-amber-900 mb-4">
+                      Please <strong>Sign In</strong> or <strong>Register</strong> an Author account using the portal button in the header to submit your research paper.
+                    </div>
+                  ) : (
+                    <form onSubmit={handleFormSubmit} className="space-y-4 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Author Name</label>
+                          <input type="text" disabled value={userProfile?.full_name || ''} className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded" />
+                        </div>
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Author Email</label>
+                          <input type="text" disabled value={userProfile?.email || ''} className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded" />
+                        </div>
+                      </div>
 
-    async function updateSubmissionStatus(manuscriptId, newStatus) {
-      const { error } = await db.from('submissions').update({ status: newStatus }).eq('manuscript_id', manuscriptId);
-      if (error) {
-        alert("Failed to update status: " + error.message);
-      } else {
-        alert(`Status updated to '${newStatus}' for ${manuscriptId}`);
-        loadEditorDashboard();
-        loadPublishedArticles();
-      }
-    }
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Manuscript Title *</label>
+                        <input 
+                          type="text" required value={formData.title}
+                          onChange={e => setFormData({...formData, title: e.target.value})}
+                          className="w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 outline-none" 
+                        />
+                      </div>
 
-    function searchManuscriptById() {
-      const query = document.getElementById('editorSearchId').value.trim().toUpperCase();
-      const display = document.getElementById('searchResultDisplay');
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Academic Discipline *</label>
+                          <select 
+                            value={formData.category}
+                            onChange={e => setFormData({...formData, category: e.target.value})}
+                            className="w-full p-2.5 border border-slate-300 rounded bg-white"
+                          >
+                            <option>Social Sciences & Humanities</option>
+                            <option>Natural & Computational Sciences</option>
+                            <option>Business & Economics</option>
+                            <option>Engineering & Technology</option>
+                            <option>Health Sciences</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Manuscript Type *</label>
+                          <select 
+                            value={formData.manuscript_type}
+                            onChange={e => setFormData({...formData, manuscript_type: e.target.value})}
+                            className="w-full p-2.5 border border-slate-300 rounded bg-white"
+                          >
+                            <option>Original Research</option>
+                            <option>Review Article</option>
+                            <option>Short Communication</option>
+                            <option>Case Report</option>
+                            <option>Policy Brief</option>
+                          </select>
+                        </div>
+                      </div>
 
-      if (!query) {
-        display.innerHTML = '';
-        return;
-      }
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Abstract *</label>
+                        <textarea 
+                          rows="4" required value={formData.abstract}
+                          onChange={e => setFormData({...formData, abstract: e.target.value})}
+                          className="w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 outline-none"
+                        ></textarea>
+                      </div>
 
-      const match = allSubmissions.find(sub => sub.manuscript_id.toUpperCase() === query);
-      if (match) {
-        display.innerHTML = `
-          <div class="paper-card">
-            <h3>${match.title} (${match.manuscript_id})</h3>
-            <p><strong>Author:</strong> ${match.author_name} (${match.author_email})</p>
-            <p><strong>Status:</strong> <span class="status-badge status-${match.status.replace(/\s+/g, '')}">${match.status}</span></p>
-            <a href="${match.file_url}" target="_blank" class="download-btn" style="margin-top:0.5rem;">Download Submitted File</a>
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Keywords (Comma Separated) *</label>
+                        <input 
+                          type="text" required value={formData.keywords}
+                          onChange={e => setFormData({...formData, keywords: e.target.value})}
+                          className="w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 outline-none" 
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Manuscript Document (.pdf, .doc, .docx) *</label>
+                        <input 
+                          type="file" required
+                          onChange={e => setFormData({...formData, file: e.target.files[0]})}
+                          className="w-full p-2 border border-slate-300 rounded bg-white" 
+                        />
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded transition shadow"
+                      >
+                        {isSubmitting ? "Uploading Manuscript..." : "Submit Manuscript"}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* VIEW 3: AUTHOR PORTAL */}
+              {activeTab === 'author-portal' && currentUser && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                  <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4">Your Submitted Manuscripts</h2>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b-2 border-slate-200 text-slate-700">
+                          <th className="p-2">Tracking ID</th>
+                          <th className="p-2">Title</th>
+                          <th className="p-2">Type</th>
+                          <th className="p-2">Status</th>
+                          <th className="p-2">Document</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {submissions.filter(s => s.user_id === currentUser.id).length === 0 ? (
+                          <tr><td colSpan="5" className="p-4 text-center text-slate-500">No manuscript submissions found.</td></tr>
+                        ) : (
+                          submissions.filter(s => s.user_id === currentUser.id).map(sub => (
+                            <tr key={sub.id} className="border-b border-slate-100 hover:bg-slate-50">
+                              <td className="p-2 font-bold text-slate-900">{sub.manuscript_id}</td>
+                              <td className="p-2 font-medium">{sub.title}</td>
+                              <td className="p-2">{sub.manuscript_type}</td>
+                              <td className="p-2">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                  sub.status === 'Published' ? 'bg-emerald-100 text-emerald-800' :
+                                  sub.status === 'Under Review' ? 'bg-blue-100 text-blue-800' :
+                                  sub.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                  sub.status === 'Rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {sub.status}
+                                </span>
+                              </td>
+                              <td className="p-2">
+                                <a href={sub.file_url} target="_blank" rel="noreferrer" className="text-blue-700 underline font-semibold">
+                                  View File
+                                </a>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 4: REVIEWER PORTAL */}
+              {activeTab === 'reviewer-portal' && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                  <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-3 mb-4">Assigned Peer-Review Manuscripts</h2>
+                  
+                  <div className="space-y-4">
+                    {submissions.filter(s => s.assigned_reviewer_email === userProfile?.email).length === 0 ? (
+                      <p className="text-xs text-slate-500 text-center py-6">No active peer-review assignments for your account.</p>
+                    ) : (
+                      submissions.filter(s => s.assigned_reviewer_email === userProfile?.email).map(paper => (
+                        <div key={paper.id} className="p-4 border border-slate-200 rounded-md bg-slate-50 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded">{paper.manuscript_id}</span>
+                              <h3 className="text-sm font-bold mt-1 text-slate-900">{paper.title}</h3>
+                              <p className="text-xs text-slate-500">Domain: {paper.category}</p>
+                            </div>
+                            <a href={paper.file_url} target="_blank" rel="noreferrer" className="bg-amber-500 text-slate-950 px-3 py-1 text-xs font-bold rounded">
+                              📄 Download Document
+                            </a>
+                          </div>
+
+                          <p className="text-xs text-slate-700 bg-white p-3 rounded border border-slate-200">{paper.abstract}</p>
+
+                          <div className="bg-white p-4 rounded border border-slate-200 space-y-3">
+                            <h4 className="text-xs font-bold text-slate-900">Submit Evaluation Report</h4>
+                            
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 mb-1">Recommendation</label>
+                              <select 
+                                onChange={e => setReviewData({...reviewData, [paper.manuscript_id]: {...reviewData[paper.manuscript_id], recommendation: e.target.value}})}
+                                className="w-full text-xs p-2 border border-slate-300 rounded bg-white"
+                              >
+                                <option value="Accept">Accept</option>
+                                <option value="Minor Revisions">Minor Revisions</option>
+                                <option value="Major Revisions">Major Revisions</option>
+                                <option value="Reject">Reject</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 mb-1">Reviewer Feedback Notes</label>
+                              <textarea 
+                                rows="3"
+                                placeholder="Enter structural feedback for authors and editors..."
+                                onChange={e => setReviewData({...reviewData, [paper.manuscript_id]: {...reviewData[paper.manuscript_id], comments: e.target.value}})}
+                                className="w-full text-xs p-2 border border-slate-300 rounded"
+                              ></textarea>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 mb-1">Annotated Review File (Optional)</label>
+                              <input 
+                                type="file" 
+                                onChange={e => setReviewData({...reviewData, [paper.manuscript_id]: {...reviewData[paper.manuscript_id], file: e.target.files[0]}})}
+                                className="w-full text-xs p-1 border border-slate-300 rounded bg-white" 
+                              />
+                            </div>
+
+                            <button 
+                              onClick={() => handleReviewSubmit(paper.manuscript_id)}
+                              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded transition"
+                            >
+                              Submit Peer Review Report
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 5: EDITOR CONTROL PANEL */}
+              {activeTab === 'editor-portal' && userProfile?.role === 'Editor' && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-emerald-300">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3 mb-4">
+                    <h2 className="text-base font-bold text-emerald-950">Editor Workflow Dashboard</h2>
+                    <p className="text-xs text-emerald-800">Assign reviewers, evaluate feedback, and change manuscript publication status.</p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b-2 border-slate-200 text-slate-700">
+                          <th className="p-2">ID</th>
+                          <th className="p-2">Title & Author</th>
+                          <th className="p-2">Assign Reviewer</th>
+                          <th className="p-2">Reviewer Feedback</th>
+                          <th className="p-2">Status Decision</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {submissions.length === 0 ? (
+                          <tr><td colSpan="5" className="p-4 text-center text-slate-500">No submissions found.</td></tr>
+                        ) : (
+                          submissions.map(s => (
+                            <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50">
+                              <td className="p-2 font-bold text-slate-900">{s.manuscript_id}</td>
+                              <td className="p-2">
+                                <strong>{s.title}</strong><br/>
+                                <span className="text-slate-500">{s.author_name} ({s.author_email})</span>
+                              </td>
+                              <td className="p-2">
+                                <div className="flex gap-1">
+                                  <input 
+                                    type="email" 
+                                    placeholder="reviewer@uok.edu.et" 
+                                    defaultValue={s.assigned_reviewer_email || ''} 
+                                    id={`rev_input_${s.manuscript_id}`}
+                                    className="p-1 border border-slate-300 rounded text-[11px] w-36"
+                                  />
+                                  <button 
+                                    onClick={() => handleAssignReviewer(s.manuscript_id, document.getElementById(`rev_input_${s.manuscript_id}`).value)}
+                                    className="bg-slate-800 text-white px-2 py-1 rounded text-[10px] font-bold"
+                                  >
+                                    Assign
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="p-2">
+                                {s.reviewer_recommendation ? (
+                                  <div>
+                                    <span className="font-bold text-slate-800">Rec: {s.reviewer_recommendation}</span><br/>
+                                    {s.reviewer_file_url && <a href={s.reviewer_file_url} target="_blank" rel="noreferrer" className="text-blue-700 underline text-[10px]">Annotated File</a>}
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400 italic">Pending</span>
+                                )}
+                              </td>
+                              <td className="p-2">
+                                <select 
+                                  value={s.status} 
+                                  onChange={e => handleUpdateStatus(s.manuscript_id, e.target.value)}
+                                  className="p-1 border border-slate-300 rounded text-xs font-semibold bg-white"
+                                >
+                                  <option value="Submitted">Submitted</option>
+                                  <option value="Under Review">Under Review</option>
+                                  <option value="Revision Requested">Revision Requested</option>
+                                  <option value="Accepted">Accepted</option>
+                                  <option value="Published">Published</option>
+                                  <option value="Rejected">Rejected</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 6: STATIC PAGES */}
+              {['about', 'editorial-board', 'aims-scope', 'author-guidelines'].includes(activeTab) && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 text-xs leading-relaxed space-y-4">
+                  {activeTab === 'about' && (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">About the Journal</h2>
+                      <p>The <strong>Journal of Integrative Science Development (JISD)</strong> is a bi-annual, peer-reviewed open-access journal published by the Research, Publication and Ethics Dissemination Directorate (RPEDD) at the University of Kabridahar, Ethiopia.</p>
+                      <p>JISD provides an academic platform bridging interdisciplinary research across dryland agriculture, natural sciences, health, engineering, and social development.</p>
+                    </>
+                  )}
+
+                  {activeTab === 'editorial-board' && (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">Editorial Board</h2>
+                      <div className="grid grid-cols-1 gap-4 pt-2">
+                        {boardMembers.map((m, idx) => (
+                          <div key={idx} className="p-4 border border-slate-200 rounded-md bg-slate-50">
+                            <h3 className="font-bold text-sm text-slate-900">{m.name}</h3>
+                            <span className="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded inline-block my-1">{m.role}</span>
+                            <p className="text-slate-600">{m.affiliation}</p>
+                            <p className="text-blue-700 font-medium">{m.email}</p>
+                            <p className="text-slate-500 italic mt-1">{m.bio}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === 'aims-scope' && (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">Aims & Scope</h2>
+                      <p>JISD accepts original research papers, reviews, short communications, and policy briefs across five main faculty tracks:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Natural & Computational Sciences</li>
+                        <li>Health & Medical Sciences</li>
+                        <li>Engineering, Technology & Environmental Studies</li>
+                        <li>Social Sciences & Humanities</li>
+                        <li>Business, Economics & Pastoral Development Studies</li>
+                      </ul>
+                    </>
+                  )}
+
+                  {activeTab === 'author-guidelines' && (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">Author Guidelines</h2>
+                      <p>Manuscripts must be formatted according to standard research layouts: Title, Abstract (max 250 words), Keywords (4-6), Introduction, Methodology, Results, Discussion, and References.</p>
+                      <p><strong>Article Processing Charges (APC):</strong> JISD charges zero publication or submission fees for all accepted manuscripts.</p>
+                    </>
+                  )}
+                </div>
+              )}
+
+            </main>
           </div>
-        `;
-      } else {
-        display.innerHTML = `<p style="color: var(--danger);">No manuscript found with ID: ${query}</p>`;
-      }
+
+          {/* AUTHENTICATION MODAL */}
+          {showAuthModal && (
+            <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 border border-slate-200">
+                
+                <div className="flex border-b border-slate-200 mb-4 text-xs font-bold">
+                  <button 
+                    onClick={() => { setAuthMode('login'); setAuthError(''); setAuthMessage(''); }}
+                    className={`flex-1 pb-2 text-center border-b-2 ${authMode === 'login' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400'}`}
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    onClick={() => { setAuthMode('register'); setAuthError(''); setAuthMessage(''); }}
+                    className={`flex-1 pb-2 text-center border-b-2 ${authMode === 'register' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400'}`}
+                  >
+                    Register
+                  </button>
+                </div>
+
+                {authError && <div className="mb-3 text-xs bg-red-50 border border-red-200 text-red-700 p-2 rounded">{authError}</div>}
+                {authMessage && <div className="mb-3 text-xs bg-emerald-50 border border-emerald-200 text-emerald-700 p-2 rounded">{authMessage}</div>}
+
+                <form onSubmit={handleAuthSubmit} className="space-y-3 text-xs">
+                  {authMode === 'register' && (
+                    <>
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Full Name *</label>
+                        <input 
+                          type="text" required value={regFullName}
+                          onChange={e => setRegFullName(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Affiliation *</label>
+                        <input 
+                          type="text" required value={regAffiliation}
+                          onChange={e => setRegAffiliation(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">Account Role *</label>
+                        <select 
+                          value={regRole} 
+                          onChange={e => setRegRole(e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded bg-white"
+                        >
+                          <option value="Author">Author</option>
+                          <option value="Reviewer">Peer Reviewer</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
+                    <input 
+                      type="email" required value={authEmail}
+                      onChange={e => setAuthEmail(e.target.value)}
+                      className="w-full p-2 border border-slate-300 rounded" 
+                      placeholder="user@uok.edu.et"
+                    />
+                  </div>
+
+                  {authMode !== 'reset' && (
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Password *</label>
+                      <input 
+                        type="password" required value={authPassword}
+                        onChange={e => setAuthPassword(e.target.value)}
+                        className="w-full p-2 border border-slate-300 rounded" 
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  )}
+
+                  {authMode === 'login' && (
+                    <p className="text-[11px] text-right">
+                      <button type="button" onClick={() => setAuthMode('reset')} className="text-blue-700 hover:underline">
+                        Forgot password?
+                      </button>
+                    </p>
+                  )}
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowAuthModal(false)} 
+                      className="px-3 py-1.5 text-slate-500 hover:bg-slate-100 rounded text-xs font-semibold"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting}
+                      className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded text-xs font-bold transition"
+                    >
+                      {isSubmitting ? "Processing..." : authMode === 'login' ? "Sign In" : authMode === 'register' ? "Create Account" : "Send Reset Link"}
+                    </button>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <footer className="bg-slate-900 text-slate-400 text-xs py-6 border-t-4 border-amber-500 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 text-center space-y-1">
+              <p className="text-slate-200 font-bold">University of Kabridahar • Research, Publication and Ethics Dissemination Directorate (RPEDD)</p>
+              <p>© 2026 Journal of Integrative Science Development (JISD). All Rights Reserved.</p>
+            </div>
+          </footer>
+
+        </div>
+      );
     }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
