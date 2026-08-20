@@ -24,42 +24,47 @@
     header { background-color: var(--navy-primary); border-bottom: 4px solid var(--gold-accent); position: sticky; top: 0; z-index: 100; }
     .header-container { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
     .brand-group { display: flex; align-items: center; gap: 1rem; }
-    .logo-img { height: 55px; width: 55px; object-fit: contain; background: #FFF; border-radius: 50%; padding: 2px; border: 2px solid var(--gold-accent); }
-    .brand-text h1 { color: #FFF; font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
-    .brand-text p { color: #94A3B8; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .logo-img { height: 50px; width: 50px; object-fit: contain; background: #FFF; border-radius: 50%; padding: 2px; border: 2px solid var(--gold-accent); }
+    .brand-text h1 { color: #FFF; font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+    .brand-text p { color: #94A3B8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
     nav { display: flex; gap: 0.5rem; align-items: center; }
-    .nav-btn { background: none; border: none; color: #E2E8F0; padding: 0.5rem 0.85rem; font-weight: 500; font-size: 0.9rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+    .nav-btn { background: none; border: none; color: #E2E8F0; padding: 0.5rem 0.85rem; font-weight: 500; font-size: 0.88rem; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
     .nav-btn:hover, .nav-btn.active { color: #FFF; background-color: rgba(255, 255, 255, 0.1); }
     .btn-portal-cta { background-color: var(--gold-accent); color: var(--navy-primary); font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
 
-    .main-layout { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 2.8fr 1fr; gap: 2rem; }
+    .main-layout { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 2.8fr 1.2fr; gap: 2rem; }
     @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
 
     .view-section { display: none; }
     .view-section.active { display: block; }
     .card { background: var(--card-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .card h2 { color: var(--navy-primary); font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 2px solid var(--bg-light); padding-bottom: 0.5rem; }
-
-    .callout-box { background-color: #E0F2FE; border-left: 4px solid var(--blue-secondary); padding: 1rem 1.25rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.9rem; }
-    .scope-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .scope-card { background: var(--bg-light); border-left: 3px solid var(--blue-secondary); padding: 0.85rem; border-radius: 4px; }
-    .scope-card h3 { font-size: 0.9rem; color: var(--navy-primary); margin-bottom: 0.25rem; }
-    .scope-card p { font-size: 0.8rem; color: var(--text-muted); }
+    .card h2 { color: var(--navy-primary); font-size: 1.25rem; margin-bottom: 1rem; border-bottom: 2px solid var(--bg-light); padding-bottom: 0.5rem; }
 
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy-primary); margin-bottom: 0.35rem; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; font-family: inherit; }
-    .btn-action { background-color: var(--navy-primary); color: #FFF; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; width: 100%; }
+    
+    .btn-action { background-color: var(--navy-primary); color: #FFF; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 0.5rem; }
     .btn-action:hover { background-color: var(--blue-secondary); }
+    .btn-secondary { background-color: #E2E8F0; color: var(--text-dark); border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; border-radius: 4px; cursor: pointer; margin-bottom: 0.5rem; }
 
-    .role-switcher { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 1.2rem; }
-    .role-btn { flex: 1; padding: 0.6rem; background: none; border: none; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; }
-    .role-btn.active { color: var(--navy-primary); border-bottom-color: var(--blue-secondary); background: rgba(0,86,145,0.04); }
+    .paper-card { border: 1px solid var(--border-color); border-left: 4px solid var(--navy-primary); padding: 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; background: #FFF; }
+    .paper-card h3 { font-size: 1.1rem; color: var(--navy-primary); margin-bottom: 0.4rem; }
+    .paper-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .paper-badge { background: #E0F2FE; color: var(--blue-secondary); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .paper-abstract { font-size: 0.88rem; color: var(--text-dark); line-height: 1.5; margin-bottom: 1rem; }
+    .download-btn { display: inline-flex; align-items: center; gap: 0.4rem; background-color: var(--gold-accent); color: var(--navy-primary); padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-decoration: none; }
 
-    .auth-toggle { display: flex; background: var(--bg-light); padding: 3px; border-radius: 6px; margin-bottom: 1.2rem; }
-    .auth-toggle button { flex: 1; border: none; padding: 0.4rem; font-size: 0.85rem; font-weight: 600; background: none; cursor: pointer; border-radius: 4px; color: var(--text-muted); }
-    .auth-toggle button.active { background: #FFF; color: var(--navy-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .coauthor-entry { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .coauthor-entry input { flex: 1; }
+    
+    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .status-pending { background-color: #FEF3C7; color: #92400E; }
+    
+    .user-banner { background: #E0F2FE; border-left: 4px solid var(--blue-secondary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .checkbox-group { display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.85rem; margin-bottom: 0.75rem; }
+    .checkbox-group input { margin-top: 0.2rem; }
 
     footer { background: var(--navy-primary); color: #94A3B8; text-align: center; padding: 1.5rem; font-size: 0.85rem; border-top: 4px solid var(--gold-accent); margin-top: 3rem; }
   </style>
@@ -78,9 +83,9 @@
       </div>
       <nav>
         <button class="nav-btn active" onclick="switchView('home', this)">Home</button>
-        <button class="nav-btn" onclick="switchView('issues', this)">Current & Archives</button>
-        <button class="nav-btn" onclick="switchView('guidelines', this)">Author Guidelines</button>
-        <button class="btn-portal-cta" onclick="switchView('portal', this)">Portal Access</button>
+        <button class="nav-btn" onclick="switchView('published', this)">Published Articles</button>
+        <button class="nav-btn" onclick="switchView('guidelines', this)">Guidelines</button>
+        <button class="btn-portal-cta" id="nav-portal-btn" onclick="handlePortalClick()">Author Dashboard</button>
       </nav>
     </div>
   </header>
@@ -88,120 +93,156 @@
   <div class="main-layout">
     <main>
 
+      <!-- HOME SECTION -->
       <section id="view-home" class="view-section active">
-        <div class="callout-box">
-          <p><strong>Call for Papers (Inaugural Issue):</strong> Double-blind peer review system. <strong>No publication fees</strong> for the inaugural issue.</p>
-          <p><strong>Submission Deadline:</strong> June 10, 2026</p>
-        </div>
-
         <div class="card">
-          <h2>About the Journal (UoK - JISD)</h2>
-          <p>UoK JISD serves as a dynamic forum for intellectual exchange on issues affecting humanity and transformative interventions. We bridge the gap between science, technology, and society through high-quality interdisciplinary research and meaningful knowledge transfer.</p>
+          <h2>Welcome to UoK - JISD Portal</h2>
+          <p>The Journal of Integrative Science Development is an open-access, double-blind peer-reviewed journal published by the University of Kabridahar. Explore our collection of peer-reviewed articles or submit your research manuscript today.</p>
         </div>
+      </section>
 
+      <!-- PUBLISHED ARTICLES LIBRARY -->
+      <section id="view-published" class="view-section">
         <div class="card">
-          <h2>Scope of the Journal</h2>
-          <div class="scope-grid">
-            <div class="scope-card"><h3>1. Social Sciences & Humanities</h3><p>Law, Sociology, Peace & Conflict, Tourism, Urban Planning.</p></div>
-            <div class="scope-card"><h3>2. Business & Economics</h3><p>Economics, Accounting, Finance, Logistics, Public Admin.</p></div>
-            <div class="scope-card"><h3>3. Natural & Computational</h3><p>Biology, Chemistry, Physics, Mathematics, Statistics.</p></div>
-            <div class="scope-card"><h3>4. Engineering & Technology</h3><p>Petroleum, Civil, Software, Computer Science, IT.</p></div>
-            <div class="scope-card"><h3>5. Health Sciences</h3><p>Public Health, Medicine, Nursing, Midwifery, Pharmacy, Nutrition.</p></div>
+          <h2>Published Articles Library</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Search open-access papers published by UoK - JISD.</p>
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <input type="text" id="paperSearch" placeholder="Search by title, author, or keyword..." onkeyup="filterArticles()">
+            <select id="domainFilter" onchange="filterArticles()">
+              <option value="ALL">All Academic Domains</option>
+              <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+              <option value="Business & Economics">Business & Economics</option>
+              <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
+              <option value="Engineering & Technology">Engineering & Technology</option>
+              <option value="Health Sciences">Health Sciences</option>
+            </select>
+          </div>
+
+          <div id="publishedArticlesList">
+            <p style="text-align: center; color: var(--text-muted);">Loading published articles...</p>
           </div>
         </div>
       </section>
 
-      <section id="view-issues" class="view-section">
-        <div class="card">
-          <h2>Inaugural Issue (Vol 1, No 1 - 2026)</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Submissions currently open for the inaugural publication cycle. Published articles will appear here in open-access format.</p>
-          <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; background: var(--bg-light);">
-            <span style="font-size: 0.75rem; background: var(--blue-secondary); color: #FFF; padding: 2px 6px; border-radius: 3px; font-weight: 600;">FORTHCOMING</span>
-            <h3 style="font-size: 1rem; margin-top: 0.4rem; color: var(--navy-primary);">Inaugural Print & Digital Issue</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Print Version ISBN Recognition Included.</p>
-          </div>
-        </div>
-      </section>
-
+      <!-- GUIDELINES SECTION -->
       <section id="view-guidelines" class="view-section">
         <div class="card">
-          <h2>Manuscript Submission Guidelines</h2>
+          <h2>Submission Guidelines</h2>
           <ul style="padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>Language & Originality:</strong> Manuscripts must be written in English, original, and not under consideration elsewhere.</li>
-            <li><strong>File Format:</strong> Only Microsoft Word format (`.doc`, `.docx`) is accepted.</li>
-            <li><strong>Free Formatting:</strong> Initial submissions may be made in free format with minimal formatting requirements.</li>
-            <li><strong>Peer Review Model:</strong> All submissions undergo a double-blind peer review process. Ensure no author names or institutional affiliations appear within the file body.</li>
+            <li><strong>Peer Review Model:</strong> Double-blind (remove author names from file body).</li>
+            <li><strong>Accepted Formats:</strong> Microsoft Word (`.doc`, `.docx`).</li>
+            <li><strong>Required Information:</strong> Full co-author details, conflict of interest disclosure, and ethical approval statement.</li>
           </ul>
         </div>
       </section>
 
-      <section id="view-portal" class="view-section">
+      <!-- AUTHOR DASHBOARD -->
+      <section id="view-dashboard" class="view-section">
+        <div class="user-banner">
+          <div>
+            <strong id="user-display-name">Author</strong>
+            <p id="user-display-email" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+          </div>
+          <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="color: var(--navy-primary);">Your Submissions</h2>
+          <button class="btn-portal-cta" onclick="switchView('submit', null)">+ Submit New Manuscript</button>
+        </div>
+
         <div class="card">
-          <h2>Author Manuscript Submission Portal</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Complete all fields below. Files are uploaded directly to the database.</p>
-          
-          <form id="submissionForm">
-            <div class="form-group"><label>Corresponding Author Name *</label><input type="text" id="author_name" required></div>
-            <div class="form-group"><label>Corresponding Author Email *</label><input type="email" id="author_email" required></div>
-            <div class="form-group"><label>Institutional Affiliation *</label><input type="text" id="affiliation" required></div>
-            <div class="form-group"><label>Manuscript Title *</label><input type="text" id="title" required></div>
-            <div class="form-group">
-              <label>Academic Domain *</label>
-              <select id="domain" required>
-                <option value="" disabled selected>Select domain...</option>
-                <option>Social Sciences & Humanities</option>
-                <option>Business & Economics</option>
-                <option>Natural & Computational Sciences</option>
-                <option>Engineering & Technology</option>
-                <option>Health Sciences</option>
-              </select>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;" id="submissionsTable">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
+                <th style="padding: 0.5rem;">ID</th>
+                <th style="padding: 0.5rem;">Title</th>
+                <th style="padding: 0.5rem;">Domain</th>
+                <th style="padding: 0.5rem;">Submitted</th>
+                <th style="padding: 0.5rem;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="submissionsTableBody">
+              <tr><td colspan="5" style="padding: 1rem; text-align: center; color: var(--text-muted);">Loading your submissions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SUBMISSION FORM -->
+      <section id="view-submit" class="view-section">
+        <div class="card">
+          <h2>Submit New Manuscript</h2>
+          <form id="manuscriptForm">
+            <div class="form-group"><label>Manuscript Title *</label><input type="text" id="m_title" required></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>Academic Domain *</label>
+                <select id="m_domain" required>
+                  <option value="" disabled selected>Select domain...</option>
+                  <option>Social Sciences & Humanities</option>
+                  <option>Business & Economics</option>
+                  <option>Natural & Computational Sciences</option>
+                  <option>Engineering & Technology</option>
+                  <option>Health Sciences</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Manuscript Type *</label>
+                <select id="m_type" required>
+                  <option value="" disabled selected>Select type...</option>
+                  <option>Original Research Article</option>
+                  <option>Review Article</option>
+                  <option>Case Study</option>
+                  <option>Short Communication</option>
+                </select>
+              </div>
             </div>
+            <div class="form-group"><label>Abstract *</label><textarea id="m_abstract" rows="5" required></textarea></div>
             <div class="form-group">
-              <label>Manuscript Type *</label>
-              <select id="type" required>
-                <option value="" disabled selected>Select manuscript type...</option>
-                <option>Original Research Article (5,000-8,000 words)</option>
-                <option>Review Article (5,000-8,000 words)</option>
-                <option>Case Study (5,000-8,000 words)</option>
-                <option>Short Communication (≤ 3,000 words)</option>
-                <option>Policy Brief (800-1,600 words)</option>
-              </select>
+              <label>Co-Authors (If applicable)</label>
+              <div id="coauthorList"></div>
+              <button type="button" class="btn-secondary" onclick="addCoauthorField()">+ Add Co-Author</button>
             </div>
-            <div class="form-group"><label>Abstract *</label><textarea id="abstract" rows="4" required></textarea></div>
-            <div class="form-group"><label>Upload Manuscript File (.doc, .docx) *</label><input type="file" id="manuscript_file" accept=".doc,.docx" required></div>
-            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript to JISD</button>
+            <div class="form-group"><label>Upload Anonymous Manuscript File (.doc, .docx) *</label><input type="file" id="m_file" accept=".doc,.docx" required></div>
+
+            <div style="background: var(--bg-light); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+              <h3 style="font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--navy-primary);">Declarations</h3>
+              <div class="checkbox-group"><input type="checkbox" id="dec_1" required><label for="dec_1">Manuscript is original and not under consideration elsewhere.</label></div>
+              <div class="checkbox-group"><input type="checkbox" id="dec_2" required><label for="dec_2">No conflicts of interest exist.</label></div>
+              <div class="checkbox-group"><input type="checkbox" id="dec_3" required><label for="dec_3">Author names removed from file body for double-blind review.</label></div>
+            </div>
+
+            <button type="submit" class="btn-action" id="submitManuscriptBtn">Submit Manuscript to JISD</button>
+            <button type="button" class="btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="switchView('dashboard', null)">Cancel</button>
           </form>
         </div>
       </section>
 
     </main>
 
+    <!-- SIDEBAR -->
     <aside>
-      <div class="card">
-        <h2>User Portal</h2>
-        <div class="auth-toggle">
-          <button id="btn-mode-login" class="active" onclick="toggleAuthMode('login')">Login</button>
-          <button id="btn-mode-reg" onclick="toggleAuthMode('register')">Register</button>
+      <div class="card" id="auth-card">
+        <h2>Author Account</h2>
+        <div style="display: flex; background: var(--bg-light); padding: 3px; border-radius: 6px; margin-bottom: 1.2rem;">
+          <button id="tab-login" class="btn-secondary" style="flex: 1; margin: 0;" onclick="toggleAuthTab('login')">Sign In</button>
+          <button id="tab-reg" class="btn-secondary" style="flex: 1; margin: 0; background: transparent;" onclick="toggleAuthTab('register')">Register</button>
         </div>
 
-        <div class="role-switcher">
-          <button class="role-btn active" onclick="setRole('Author', this)">Author</button>
-          <button class="role-btn" onclick="setRole('Reviewer', this)">Reviewer</button>
-          <button class="role-btn" id="editor-tab-btn" onclick="setRole('Editor', this)">Editor</button>
-        </div>
-
-        <form id="auth-form-login" onsubmit="event.preventDefault(); alert('Logged in successfully!');">
-          <div class="form-group"><label>Email Address</label><input type="email" required placeholder="user@uok.edu.et"></div>
-          <div class="form-group"><label>Password</label><input type="password" required placeholder="••••••••"></div>
-          <button type="submit" class="btn-action" id="login-label">Login as Author</button>
+        <form id="form-signin" onsubmit="handleSignIn(event)">
+          <div class="form-group"><label>Email Address</label><input type="email" id="login_email" required></div>
+          <div class="form-group"><label>Password</label><input type="password" id="login_pass" required></div>
+          <button type="submit" class="btn-action" id="loginBtn">Sign In to Dashboard</button>
         </form>
 
-        <form id="auth-form-register" style="display: none;" onsubmit="event.preventDefault(); alert('Registration submitted for approval!');">
-          <div class="form-group"><label>Full Name</label><input type="text" required></div>
-          <div class="form-group"><label>Email Address</label><input type="email" required></div>
-          <div class="form-group"><label>Affiliation</label><input type="text" required></div>
-          <div class="form-group"><label>Password</label><input type="password" required></div>
-          <button type="submit" class="btn-action" id="reg-label">Register as Author</button>
+        <form id="form-signup" style="display: none;" onsubmit="handleSignUp(event)">
+          <div class="form-group"><label>Full Name *</label><input type="text" id="reg_name" required></div>
+          <div class="form-group"><label>Institutional Affiliation *</label><input type="text" id="reg_affiliation" required></div>
+          <div class="form-group"><label>Email Address *</label><input type="email" id="reg_email" required></div>
+          <div class="form-group"><label>Password *</label><input type="password" id="reg_pass" required minlength="6"></div>
+          <button type="submit" class="btn-action" id="regBtn">Create Author Account</button>
         </form>
       </div>
 
@@ -220,78 +261,224 @@
   </footer>
 
   <script>
-    // 1. SUPABASE INITIALIZATION
     const SUPABASE_URL = "https://lrpcvfytbfkoofxvvbfh.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29meHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 2. NAV & UI LOGIC
-    function switchView(viewId, element) {
-      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-btn, .btn-portal-cta').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`view-${viewId}`).classList.add('active');
-      if (element) element.classList.add('active');
+    let currentUser = null;
+    let allPublishedArticles = [];
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        updateUIForAuthenticatedUser();
+      }
+      loadPublishedArticles();
+    });
+
+    // LOAD PUBLISHED ARTICLES FROM SUPABASE
+    async function loadPublishedArticles() {
+      const { data, error } = await db
+        .from('submissions')
+        .select('*')
+        .eq('status', 'Published')
+        .order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        document.getElementById('publishedArticlesList').innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <p>No published articles found in the current archive cycle.</p>
+          </div>
+        `;
+        return;
+      }
+
+      allPublishedArticles = data;
+      renderArticles(allPublishedArticles);
     }
 
-    function toggleAuthMode(mode) {
-      document.getElementById('btn-mode-login').classList.toggle('active', mode === 'login');
-      document.getElementById('btn-mode-reg').classList.toggle('active', mode === 'register');
-      document.getElementById('auth-form-login').style.display = (mode === 'login') ? 'block' : 'none';
-      document.getElementById('auth-form-register').style.display = (mode === 'register') ? 'block' : 'none';
+    function renderArticles(articles) {
+      const list = document.getElementById('publishedArticlesList');
+      if (articles.length === 0) {
+        list.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No matching published articles found.</p>`;
+        return;
+      }
+
+      list.innerHTML = articles.map(paper => `
+        <div class="paper-card">
+          <span class="paper-badge">${paper.domain}</span>
+          <h3 style="margin-top: 0.4rem;">${paper.title}</h3>
+          <div class="paper-meta">
+            <span><strong>Authors:</strong> ${paper.author_name}</span>
+            <span>|</span>
+            <span><strong>Published:</strong> ${new Date(paper.created_at).toLocaleDateString()}</span>
+            <span>|</span>
+            <span><strong>ID:</strong> ${paper.manuscript_id || 'JISD-2026'}</span>
+          </div>
+          <p class="paper-abstract"><strong>Abstract:</strong> ${paper.abstract}</p>
+          <a href="${paper.file_url}" target="_blank" download class="download-btn">
+            📄 Download Full Manuscript File
+          </a>
+        </div>
+      `).join('');
     }
 
-    function setRole(role, element) {
-      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-      element.classList.add('active');
-      document.getElementById('login-label').innerText = `Login as ${role}`;
-      document.getElementById('reg-label').innerText = `Register as ${role}`;
+    function filterArticles() {
+      const query = document.getElementById('paperSearch').value.toLowerCase();
+      const domain = document.getElementById('domainFilter').value;
+
+      const filtered = allPublishedArticles.filter(paper => {
+        const matchesQuery = paper.title.toLowerCase().includes(query) || 
+                             paper.author_name.toLowerCase().includes(query) || 
+                             paper.abstract.toLowerCase().includes(query);
+        const matchesDomain = (domain === 'ALL') || (paper.domain === domain);
+        return matchesQuery && matchesDomain;
+      });
+
+      renderArticles(filtered);
     }
 
-    // 3. MANUSCRIPT UPLOAD & DATABASE INSERT
-    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
+    // AUTH HANDLERS
+    async function handleSignUp(e) {
       e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      btn.innerText = "Uploading Manuscript...";
-      btn.disabled = true;
+      const email = document.getElementById('reg_email').value;
+      const password = document.getElementById('reg_pass').value;
+      const fullName = document.getElementById('reg_name').value;
+      const affiliation = document.getElementById('reg_affiliation').value;
+
+      const { data, error } = await db.auth.signUp({
+        email, password, options: { data: { full_name: fullName, affiliation: affiliation } }
+      });
+
+      if (error) return alert("Registration failed: " + error.message);
+      currentUser = data.user;
+      updateUIForAuthenticatedUser();
+      switchView('dashboard', null);
+    }
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('login_email').value;
+      const password = document.getElementById('login_pass').value;
+
+      const { data, error } = await db.auth.signInWithPassword({ email, password });
+      if (error) return alert("Login failed: " + error.message);
+
+      currentUser = data.user;
+      updateUIForAuthenticatedUser();
+      switchView('dashboard', null);
+    }
+
+    async function handleLogout() {
+      await db.auth.signOut();
+      location.reload();
+    }
+
+    function updateUIForAuthenticatedUser() {
+      document.getElementById('auth-card').innerHTML = `
+        <h2>Author Account</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Logged in as:</p>
+        <strong style="color: var(--navy-primary);">${currentUser.user_metadata.full_name || currentUser.email}</strong>
+        <button class="btn-action" style="margin-top: 1rem;" onclick="switchView('dashboard', null)">Go to Dashboard</button>
+      `;
+      document.getElementById('user-display-name').innerText = currentUser.user_metadata.full_name || "Author";
+      document.getElementById('user-display-email').innerText = currentUser.email;
+      loadUserSubmissions();
+    }
+
+    function handlePortalClick() {
+      if (currentUser) switchView('dashboard', null);
+      else alert("Please sign in or register an account to access the dashboard.");
+    }
+
+    function addCoauthorField() {
+      const container = document.getElementById('coauthorList');
+      const div = document.createElement('div');
+      div.className = 'coauthor-entry';
+      div.innerHTML = `
+        <input type="text" placeholder="Co-author Name" class="ca-name">
+        <input type="email" placeholder="Co-author Email" class="ca-email">
+        <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    // MANUSCRIPT SUBMISSION
+    document.getElementById('manuscriptForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitManuscriptBtn');
+      btn.disabled = true; btn.innerText = "Submitting...";
 
       try {
-        const fileInput = document.getElementById('manuscript_file');
-        const file = fileInput.files[0];
-        const filePath = `${Date.now()}_${file.name}`;
+        const file = document.getElementById('m_file').files[0];
+        const manuscriptId = `JISD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+        const filePath = `${manuscriptId}_${file.name}`;
 
-        // Upload file to Supabase Storage Bucket
-        const { data: uploadData, error: uploadError } = await db.storage
-          .from('manuscripts')
-          .upload(filePath, file);
-
+        const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, file);
         if (uploadError) throw uploadError;
 
-        // Fetch Public File URL
         const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
 
-        // Insert record into PostgreSQL database table
         const { error: dbError } = await db.from('submissions').insert([{
-          author_name: document.getElementById('author_name').value,
-          author_email: document.getElementById('author_email').value,
-          affiliation: document.getElementById('affiliation').value,
-          title: document.getElementById('title').value,
-          domain: document.getElementById('domain').value,
-          manuscript_type: document.getElementById('type').value,
-          abstract: document.getElementById('abstract').value,
-          file_url: urlData.publicUrl
+          manuscript_id: manuscriptId,
+          user_id: currentUser.id,
+          author_name: currentUser.user_metadata.full_name || "Author",
+          author_email: currentUser.email,
+          affiliation: currentUser.user_metadata.affiliation || "UoK",
+          title: document.getElementById('m_title').value,
+          domain: document.getElementById('m_domain').value,
+          manuscript_type: document.getElementById('m_type').value,
+          abstract: document.getElementById('m_abstract').value,
+          file_url: urlData.publicUrl,
+          status: 'Submitted'
         }]);
 
         if (dbError) throw dbError;
 
-        alert("Manuscript uploaded successfully! Submission recorded in Supabase.");
-        document.getElementById('submissionForm').reset();
+        alert(`Manuscript submitted successfully!\nID: ${manuscriptId}`);
+        document.getElementById('manuscriptForm').reset();
+        loadUserSubmissions();
+        switchView('dashboard', null);
       } catch (err) {
         alert("Submission failed: " + err.message);
       } finally {
-        btn.innerText = "Submit Manuscript to JISD";
-        btn.disabled = false;
+        btn.disabled = false; btn.innerText = "Submit Manuscript to JISD";
       }
     });
+
+    async function loadUserSubmissions() {
+      if (!currentUser) return;
+      const { data } = await db.from('submissions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+      const tbody = document.getElementById('submissionsTableBody');
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding: 1rem; text-align: center; color: var(--text-muted);">No submissions found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(sub => `
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 0.5rem; font-weight: 700; color: var(--navy-primary);">${sub.manuscript_id || 'JISD-2026'}</td>
+          <td style="padding: 0.5rem;">${sub.title}</td>
+          <td style="padding: 0.5rem;">${sub.domain}</td>
+          <td style="padding: 0.5rem;">${new Date(sub.created_at).toLocaleDateString()}</td>
+          <td style="padding: 0.5rem;"><span class="status-badge status-pending">${sub.status || 'Submitted'}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function switchView(viewId, element) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`view-${viewId}`).classList.add('active');
+      if (element) element.classList.add('active');
+    }
+
+    function toggleAuthTab(tab) {
+      document.getElementById('form-signin').style.display = (tab === 'login') ? 'block' : 'none';
+      document.getElementById('form-signup').style.display = (tab === 'register') ? 'block' : 'none';
+    }
   </script>
 </body>
 </html>
