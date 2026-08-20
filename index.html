@@ -16,7 +16,7 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800 antialiased">
+<body class="bg-gray-100 font-sans text-gray-800 antialiased">
 
   <div id="root"></div>
 
@@ -32,8 +32,12 @@
       const [loginError, setLoginError] = useState('');
       const [selectedCategory, setSelectedCategory] = useState('All');
       const [searchQuery, setSearchQuery] = useState('');
+      const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-      // Submissions / Published Repository State
+      // Raw assets path
+      const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/your-username/your-repo/main";
+
+      // Submissions & Published Articles State
       const [submissions, setSubmissions] = useState([
         {
           id: '1',
@@ -54,7 +58,7 @@
         {
           id: '2',
           manuscript_id: 'JISD-2026-102',
-          title: 'Impacts of Pastoral Microfinance Schemes on Pastoral Household Resilience',
+          title: 'Impacts of Pastoral Microfinance Schemes on Household Resilience',
           abstract: 'An empirical analysis evaluating microfinance interventions across nomadic communities in the Somali Regional State.',
           category: 'Business & Economics',
           manuscript_type: 'Original Research',
@@ -66,22 +70,6 @@
           issue: 1,
           publication_year: 2026,
           submitted_at: '2026-04-10'
-        },
-        {
-          id: '3',
-          manuscript_id: 'JISD-2026-103',
-          title: 'Climate-Resilient Sorghum Cultivars for Arid Lowlands',
-          abstract: 'Evaluation of drought-tolerant sorghum varieties under extreme heat conditions in Kabridahar agricultural zones.',
-          category: 'Natural & Computational Sciences',
-          manuscript_type: 'Original Research',
-          author_name: 'Dr. Mekuria Tsegaye',
-          author_email: 'mekuria.tsegaye20@uok.edu.et',
-          status: 'Under Review',
-          doi: '10.5281/jisd.2026.103',
-          volume: 1,
-          issue: 1,
-          publication_year: 2026,
-          submitted_at: '2026-07-20'
         }
       ]);
 
@@ -93,16 +81,44 @@
         category: 'Natural & Computational Sciences',
         manuscript_type: 'Original Research',
         author_name: '',
-        author_email: ''
+        author_email: '',
+        file: null
       });
 
       useEffect(() => {
         if (window.lucide) {
           window.lucide.createIcons();
         }
-      }, [activeTab, currentUser, showLoginModal, submissions, selectedCategory, searchQuery]);
+      }, [activeTab, currentUser, showLoginModal, submissions, selectedCategory, searchQuery, isSendingEmail]);
 
-      const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/your-username/your-repo/main";
+      // Email Notification Dispatcher (Resend API Integration)
+      const sendEmailNotification = async (submissionData) => {
+        setIsSendingEmail(true);
+        try {
+          // Replace with your active Resend API or Supabase Function endpoint
+          console.log("Sending email confirmation to:", submissionData.author_email);
+          
+          /*
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer YOUR_RESEND_API_KEY'
+            },
+            body: JSON.stringify({
+              from: 'JISD Journal <jisd@uok.edu.et>',
+              to: submissionData.author_email,
+              subject: `Manuscript Received: ${submissionData.manuscript_id}`,
+              html: `<p>Dear ${submissionData.author_name},</p><p>Thank you for submitting <strong>"${submissionData.title}"</strong> to JISD. Your Manuscript Tracking ID is <strong>${submissionData.manuscript_id}</strong>.</p>`
+            })
+          });
+          */
+        } catch (err) {
+          console.error("Email dispatch failed:", err);
+        } finally {
+          setIsSendingEmail(false);
+        }
+      };
 
       const handleLogin = (e) => {
         e.preventDefault();
@@ -122,11 +138,12 @@
         }
       };
 
-      const handleFormSubmit = (e) => {
+      const handleFormSubmit = async (e) => {
         e.preventDefault();
+        const manuscriptId = `JISD-2026-${Math.floor(Math.random() * 899 + 100)}`;
         const newSub = {
           id: Date.now().toString(),
-          manuscript_id: `JISD-2026-${Math.floor(Math.random() * 899 + 100)}`,
+          manuscript_id: manuscriptId,
           title: formData.title,
           abstract: formData.abstract,
           category: formData.category,
@@ -140,11 +157,15 @@
           publication_year: 2026,
           submitted_at: new Date().toISOString().split('T')[0]
         };
+
         setSubmissions([newSub, ...submissions]);
-        alert(`Manuscript submitted successfully! Manuscript ID: ${newSub.manuscript_id}`);
+        await sendEmailNotification(newSub);
+
+        alert(`Manuscript submitted successfully!\n\nID: ${newSub.manuscript_id}\nA confirmation email has been dispatched to ${newSub.author_email}.`);
+        
         setFormData({
           title: '', abstract: '', keywords: '', category: 'Natural & Computational Sciences',
-          manuscript_type: 'Original Research', author_name: '', author_email: ''
+          manuscript_type: 'Original Research', author_name: '', author_email: '', file: null
         });
         setActiveTab('track-manuscript');
       };
@@ -160,7 +181,7 @@
           affiliation: "University of Kabridahar, Ethiopia",
           email: "mekuria.tsegaye20@uok.edu.et",
           image: `${GITHUB_RAW_BASE}/meku.jpg`,
-          bio: "Leading overall editorial policy, scientific integrity, and publication processes for JISD."
+          bio: "Directs publication strategy, editorial policies, and review management."
         },
         {
           name: "Mahamed Abdi Wali",
@@ -168,15 +189,15 @@
           affiliation: "University of Kabridahar, Ethiopia",
           email: "rpedd@uok.edu.et",
           image: null,
-          bio: "Oversees research publication strategy and university dissemination programs."
+          bio: "Leads research publication dissemination across university faculties."
         },
         {
           name: "Latamo Lameso Lelamo",
-          role: "Associate Editor / Publication Officer",
+          role: "Associate Editor / Officer",
           affiliation: "University of Kabridahar, Ethiopia",
           email: "latamo@uok.edu.et",
           image: null,
-          bio: "Manages technical copyediting, review timelines, and issue coordination."
+          bio: "Oversees double-blind review workflow and copyediting procedures."
         }
       ];
 
@@ -189,29 +210,45 @@
       });
 
       return (
-        <div className="min-h-screen flex flex-col">
-          {/* Top Bar Header */}
-          <header className="bg-blue-900 text-white shadow-md border-b border-blue-800">
-            <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-center md:text-left">
-                  Journal of Integrative Science Development (JISD)
-                </h1>
-                <p className="text-xs text-blue-200 text-center md:text-left mt-0.5">
-                  University of Kabridahar • Research, Publication and Ethics Dissemination Directorate (RPEDD)
-                </p>
+        <div className="min-h-screen flex flex-col bg-gray-100">
+          
+          {/* HEADER WITH ORIGINAL LOGOS */}
+          <header className="bg-white border-b-2 border-blue-900 shadow-md">
+            <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              {/* Left Logo: University */}
+              <div className="flex items-center gap-3">
+                <img 
+                  src={`${GITHUB_RAW_BASE}/uok-logo.png`} 
+                  alt="University Logo" 
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/60?text=UOK"; }}
+                  className="h-16 w-auto object-contain"
+                />
+                <div>
+                  <h1 className="text-xl font-bold text-blue-950 leading-tight">
+                    Journal of Integrative Science Development
+                  </h1>
+                  <p className="text-xs text-blue-800 font-medium">
+                    University of Kabridahar • RPEDD Directorate
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              {/* Right Logo: JISD Journal Logo */}
+              <div className="flex items-center gap-4">
+                <img 
+                  src={`${GITHUB_RAW_BASE}/jisd-logo.png`} 
+                  alt="JISD Logo" 
+                  onError={(e) => { e.target.src = "https://via.placeholder.com/60?text=JISD"; }}
+                  className="h-16 w-auto object-contain hidden sm:block"
+                />
+                
                 {currentUser ? (
-                  <div className="flex items-center gap-3 bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">
-                    <div className="text-right">
-                      <p className="text-xs font-bold leading-tight">{currentUser.name}</p>
-                      <p className="text-[10px] text-blue-200">{currentUser.role} Account</p>
-                    </div>
+                  <div className="bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-md flex items-center gap-2">
+                    <span className="text-xs font-bold text-blue-900">{currentUser.name}</span>
                     <button 
                       onClick={() => { setCurrentUser(null); setActiveTab('published-articles'); }}
-                      className="text-xs bg-red-600 hover:bg-red-700 px-2.5 py-1 rounded text-white font-semibold transition"
+                      className="text-[10px] bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded"
                     >
                       Logout
                     </button>
@@ -219,9 +256,9 @@
                 ) : (
                   <button 
                     onClick={() => setShowLoginModal(true)}
-                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-md shadow transition"
+                    className="flex items-center gap-1.5 bg-blue-900 hover:bg-blue-800 text-white text-xs font-bold px-4 py-2 rounded shadow"
                   >
-                    <i data-lucide="log-in" className="w-4 h-4"></i>
+                    <i data-lucide="lock" className="w-3.5 h-3.5"></i>
                     Editor Login
                   </button>
                 )}
@@ -229,66 +266,53 @@
             </div>
           </header>
 
-          {/* Main Content Layout */}
-          <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+          {/* MAIN LAYOUT */}
+          <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
             
-            {/* Sidebar Navigation */}
-            <aside className="w-full md:w-64 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 sticky top-6">
+            {/* SIDEBAR NAVIGATION */}
+            <aside className="w-full md:w-60 flex-shrink-0">
+              <div className="bg-white rounded-md shadow-sm border border-gray-200 p-3 space-y-1">
+                <span className="text-[11px] font-bold text-gray-400 uppercase px-2 mb-1 block">Navigation</span>
                 
-                {/* Journal Info */}
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">
-                  Journal Archive & Info
-                </h2>
-                <nav className="space-y-1">
-                  {[
-                    { id: 'published-articles', label: 'Published Articles', icon: 'book-open' },
-                    { id: 'about', label: 'About JISD', icon: 'info' },
-                    { id: 'editorial-board', label: 'Editorial Board', icon: 'users' },
-                    { id: 'aims-scope', label: 'Aims & Scope', icon: 'target' },
-                    { id: 'ethics-policy', label: 'Publication Ethics', icon: 'shield-check' },
-                    { id: 'author-guidelines', label: 'Author Guidelines', icon: 'file-text' },
-                    { id: 'apc-info', label: 'Processing Charges', icon: 'dollar-sign' },
-                    { id: 'review-process', label: 'Review Timeline', icon: 'clock' },
-                  ].map((link) => (
-                    <button
-                      key={link.id}
-                      onClick={() => setActiveTab(link.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                        activeTab === link.id
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      <i data-lucide={link.icon} className="w-4 h-4"></i>
-                      <span className="truncate">{link.label}</span>
-                    </button>
-                  ))}
-                </nav>
-
-                {/* Submissions Section */}
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-6 mb-2 px-2">
-                  Editorial Tools
-                </h2>
-                <nav className="space-y-1">
+                {[
+                  { id: 'published-articles', label: 'Published Articles', icon: 'book-open' },
+                  { id: 'about', label: 'About JISD', icon: 'info' },
+                  { id: 'editorial-board', label: 'Editorial Board', icon: 'users' },
+                  { id: 'aims-scope', label: 'Aims & Scope', icon: 'target' },
+                  { id: 'ethics-policy', label: 'Publication Ethics', icon: 'shield-check' },
+                  { id: 'author-guidelines', label: 'Author Guidelines', icon: 'file-text' },
+                  { id: 'apc-info', label: 'Processing Charges', icon: 'dollar-sign' },
+                  { id: 'review-process', label: 'Review Timeline', icon: 'clock' },
+                ].map(nav => (
                   <button
-                    onClick={() => setActiveTab('submit-paper')}
-                    className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                      activeTab === 'submit-paper'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100'
+                    key={nav.id}
+                    onClick={() => setActiveTab(nav.id)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded transition ${
+                      activeTab === nav.id ? 'bg-blue-900 text-white' : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <i data-lucide="upload" className="w-4 h-4"></i>
+                    <i data-lucide={nav.icon} className="w-4 h-4"></i>
+                    <span>{nav.label}</span>
+                  </button>
+                ))}
+
+                <div className="pt-3 mt-3 border-t border-gray-100">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase px-2 mb-1 block">Author Portal</span>
+                  
+                  <button
+                    onClick={() => setActiveTab('submit-paper')}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded transition ${
+                      activeTab === 'submit-paper' ? 'bg-blue-900 text-white' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <i data-lucide="upload-cloud" className="w-4 h-4"></i>
                     <span>Submit Manuscript</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab('track-manuscript')}
-                    className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                      activeTab === 'track-manuscript'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100'
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded transition ${
+                      activeTab === 'track-manuscript' ? 'bg-blue-900 text-white' : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <i data-lucide="search" className="w-4 h-4"></i>
@@ -298,115 +322,80 @@
                   {currentUser?.role === 'Editor' && (
                     <button
                       onClick={() => setActiveTab('editor-dashboard')}
-                      className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                        activeTab === 'editor-dashboard'
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'text-emerald-700 hover:bg-emerald-50 bg-emerald-50/50'
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded transition mt-2 ${
+                        activeTab === 'editor-dashboard' ? 'bg-emerald-700 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                       }`}
                     >
-                      <i data-lucide="layout-dashboard" className="w-4 h-4"></i>
-                      <span className="font-bold">Editor Dashboard</span>
+                      <i data-lucide="sliders" className="w-4 h-4"></i>
+                      <span>Editor Control Panel</span>
                     </button>
                   )}
-                </nav>
-
-                <div className="mt-6 pt-4 border-t border-gray-100 px-2">
-                  <a
-                    href="https://github.com/your-username/your-repo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors"
-                  >
-                    <span>GitHub Repository</span>
-                    <i data-lucide="external-link" className="w-3.5 h-3.5"></i>
-                  </a>
                 </div>
               </div>
             </aside>
 
-            {/* Main Section Dynamic Views */}
+            {/* DYNAMIC MAIN CONTENT */}
             <main className="flex-1">
 
               {/* View: Published Articles */}
               {activeTab === 'published-articles' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <div className="border-b pb-4 mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-200">
+                  <div className="border-b pb-4 mb-4 flex justify-between items-center">
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">Published Articles</h2>
-                      <p className="text-xs text-gray-500 mt-1">Peer-reviewed open-access research papers published by JISD</p>
+                      <h2 className="text-xl font-bold text-gray-900">Published Research Articles</h2>
+                      <p className="text-xs text-gray-500">Open-access peer-reviewed papers</p>
                     </div>
-                    <span className="text-xs bg-blue-50 text-blue-800 font-bold px-3 py-1 rounded-full border border-blue-200">
+                    <span className="text-xs bg-blue-100 text-blue-900 font-bold px-3 py-1 rounded">
                       Vol. 1 Issue 1 (2026)
                     </span>
                   </div>
 
-                  {/* Filters and Search */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="md:col-span-2">
-                      <input 
-                        type="text"
-                        placeholder="Search published articles by title, abstract, or author..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full text-xs p-2.5 border rounded-md focus:ring-2 focus:ring-blue-600 focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full text-xs p-2.5 border rounded-md bg-white focus:ring-2 focus:ring-blue-600 focus:outline-none"
-                      >
-                        <option value="All">All Categories</option>
-                        <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
-                        <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
-                        <option value="Business & Economics">Business & Economics</option>
-                        <option value="Engineering & Technology">Engineering & Technology</option>
-                        <option value="Health Sciences">Health Sciences</option>
-                      </select>
-                    </div>
+                  {/* Search and Category Filter */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    <input 
+                      type="text"
+                      placeholder="Search title, abstract, or author..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="md:col-span-2 text-xs p-2 border rounded focus:ring-2 focus:ring-blue-900 outline-none"
+                    />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="text-xs p-2 border rounded bg-white focus:ring-2 focus:ring-blue-900 outline-none"
+                    >
+                      <option value="All">All Categories</option>
+                      <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+                      <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
+                      <option value="Business & Economics">Business & Economics</option>
+                      <option value="Engineering & Technology">Engineering & Technology</option>
+                      <option value="Health Sciences">Health Sciences</option>
+                    </select>
                   </div>
 
-                  {/* Articles List */}
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {publishedArticles.length === 0 ? (
-                      <div className="text-center py-12 border-2 border-dashed rounded-lg">
-                        <p className="text-gray-500 text-sm">No published articles match your criteria.</p>
-                      </div>
+                      <p className="text-xs text-gray-500 text-center py-8">No articles found.</p>
                     ) : (
                       publishedArticles.map(article => (
-                        <div key={article.id} className="p-5 border rounded-lg bg-white hover:border-blue-300 transition-colors shadow-sm">
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                        <div key={article.id} className="p-4 border rounded hover:border-blue-900 transition bg-white">
+                          <div className="flex gap-2 mb-1.5 flex-wrap">
+                            <span className="text-[10px] bg-blue-100 text-blue-900 font-bold px-2 py-0.5 rounded">
                               {article.category}
                             </span>
-                            <span className="text-[10px] font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                              {article.manuscript_type}
-                            </span>
-                            <span className="text-[10px] font-mono text-gray-500">
-                              DOI: {article.doi}
-                            </span>
+                            <span className="text-[10px] text-gray-500 font-mono">DOI: {article.doi}</span>
                           </div>
-
-                          <h3 className="text-base font-bold text-gray-900 hover:text-blue-600 cursor-pointer mb-1">
+                          <h3 className="text-sm font-bold text-gray-900 hover:text-blue-900 cursor-pointer">
                             {article.title}
                           </h3>
-
-                          <p className="text-xs text-blue-900 font-semibold mb-2">
-                            Author(s): {article.author_name} ({article.author_email})
+                          <p className="text-xs text-blue-950 font-semibold my-1">
+                            Authors: {article.author_name} ({article.author_email})
                           </p>
-
-                          <p className="text-xs text-gray-600 leading-relaxed mb-4">
-                            {article.abstract}
-                          </p>
-
-                          <div className="flex items-center justify-between pt-3 border-t text-xs">
-                            <span className="text-gray-400">
-                              Volume {article.volume}, Issue {article.issue} ({article.publication_year})
-                            </span>
-                            <button className="flex items-center gap-1 text-blue-600 hover:underline font-bold">
-                              <i data-lucide="file-text" className="w-3.5 h-3.5"></i>
-                              Download Full PDF
+                          <p className="text-xs text-gray-600 line-clamp-3 mb-3">{article.abstract}</p>
+                          <div className="flex justify-between items-center text-xs pt-2 border-t">
+                            <span className="text-gray-400">Published: {article.submitted_at}</span>
+                            <button className="text-blue-900 font-bold hover:underline flex items-center gap-1">
+                              <i data-lucide="download" className="w-3.5 h-3.5"></i> PDF Full-Text
                             </button>
                           </div>
                         </div>
@@ -416,74 +405,27 @@
                 </div>
               )}
 
-              {/* View: About JISD */}
-              {activeTab === 'about' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">About JISD</h2>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                    The <strong>Journal of Integrative Science Development (JISD)</strong> is an open-access, peer-reviewed multi-disciplinary journal published bi-annually (January and June) by the Research, Publication and Ethics Dissemination Directorate (RPEDD) at the University of Kabridahar, Ethiopia.
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                    JISD serves as a core academic platform for university staff, regional scholars, and global researchers to publish rigorous empirical and theoretical scientific findings.
-                  </p>
-                  <div className="bg-blue-50 border border-blue-200 p-4 rounded-md text-xs text-blue-900">
-                    <strong>Institutional Publisher:</strong> Research, Publication and Ethics Dissemination Directorate (RPEDD), University of Kabridahar.
-                  </div>
-                </div>
-              )}
-
               {/* View: Editorial Board */}
               {activeTab === 'editorial-board' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <div className="border-b border-gray-200 pb-4 mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Editorial Board</h2>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Journal of Integrative Science Development (JISD)
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {boardMembers.map((member, index) => (
-                      <div 
-                        key={index} 
-                        className="flex flex-col sm:flex-row gap-4 p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex-shrink-0">
-                          <img
-                            src={member.image || "https://via.placeholder.com/150?text=JISD"}
-                            alt={member.name}
-                            onError={(e) => {
-                              e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(member.name) + "&background=0D8ABC&color=fff";
-                            }}
-                            className="w-24 h-24 rounded-full object-cover border-2 border-blue-600 shadow-sm"
-                          />
-                        </div>
-
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-bold text-gray-900">{member.name}</h3>
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                              <i data-lucide="shield" className="w-3 h-3"></i>
-                              {member.role}
-                            </span>
-                          </div>
-
-                          <div className="mt-2 space-y-1 text-xs text-gray-600">
-                            <p className="flex items-center gap-1.5">
-                              <i data-lucide="building-2" className="w-3.5 h-3.5 text-gray-400"></i>
-                              {member.affiliation}
-                            </p>
-                            <p className="flex items-center gap-1.5">
-                              <i data-lucide="mail" className="w-3.5 h-3.5 text-gray-400"></i>
-                              <a href={`mailto:${member.email}`} className="text-blue-600 hover:underline">
-                                {member.email}
-                              </a>
-                            </p>
-                          </div>
-
-                          <p className="mt-3 text-xs text-gray-500 italic">
-                            {member.bio}
-                          </p>
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-900 border-b pb-3 mb-6">Editorial Board</h2>
+                  <div className="grid grid-cols-1 gap-4">
+                    {boardMembers.map((member, idx) => (
+                      <div key={idx} className="flex flex-col sm:flex-row gap-4 p-4 border rounded bg-gray-50">
+                        <img 
+                          src={member.image || "https://via.placeholder.com/100?text=Board"} 
+                          alt={member.name}
+                          onError={(e) => { e.target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(member.name); }}
+                          className="w-20 h-20 rounded object-cover border-2 border-blue-900"
+                        />
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-900">{member.name}</h3>
+                          <span className="text-xs font-bold text-blue-900 bg-blue-100 px-2 py-0.5 rounded inline-block my-1">
+                            {member.role}
+                          </span>
+                          <p className="text-xs text-gray-600">{member.affiliation}</p>
+                          <p className="text-xs text-blue-700">{member.email}</p>
+                          <p className="text-xs text-gray-500 italic mt-1">{member.bio}</p>
                         </div>
                       </div>
                     ))}
@@ -491,108 +433,44 @@
                 </div>
               )}
 
-              {/* View: Aims & Scope */}
-              {activeTab === 'aims-scope' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Aims & Scope</h2>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                    JISD publishes research across five core disciplinary tracks:
-                  </p>
-                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-2">
-                    <li><strong>Social Sciences & Humanities:</strong> Governance, development, linguistics, and socio-economic studies.</li>
-                    <li><strong>Natural & Computational Sciences:</strong> Biology, chemistry, mathematics, computer science, and environmental research.</li>
-                    <li><strong>Business & Economics:</strong> Microfinance, trade, market economics, and agricultural policy.</li>
-                    <li><strong>Engineering & Technology:</strong> Renewable energy, civil infrastructure, ICT, and water systems.</li>
-                    <li><strong>Health Sciences:</strong> Epidemiology, public health, nursing, and clinical management.</li>
-                  </ul>
-                </div>
-              )}
-
-              {/* View: Ethics Policy */}
-              {activeTab === 'ethics-policy' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Publication Ethics</h2>
-                  <div className="space-y-4 text-sm text-gray-700">
-                    <p><strong>Plagiarism Policy:</strong> Zero tolerance for plagiarism, data fabrication, or duplicate submission. Similarity checkers screen all manuscripts upon submission.</p>
-                    <p><strong>Peer Review Integrity:</strong> Operates under a rigorous double-blind peer-review system managed by at least two independent subject experts.</p>
-                  </div>
-                </div>
-              )}
-
-              {/* View: Guidelines */}
-              {activeTab === 'author-guidelines' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Author Guidelines</h2>
-                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-2">
-                    <li><strong>Original Research:</strong> Max 8,000 words excluding references.</li>
-                    <li><strong>Review Articles:</strong> Critical literature syntheses (up to 10,000 words).</li>
-                    <li><strong>Short Communications:</strong> Brief technical reports under 3,000 words.</li>
-                    <li><strong>Policy Briefs:</strong> Structured 2–4 page summaries for decision-makers.</li>
-                  </ul>
-                </div>
-              )}
-
-              {/* View: APC Info */}
-              {activeTab === 'apc-info' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Article Processing Charges (APC)</h2>
-                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-md text-sm">
-                    <strong>100% Free Publication:</strong> JISD does NOT charge any submission fees or Article Processing Charges (APCs). All publication costs are sponsored by the University of Kabridahar.
-                  </div>
-                </div>
-              )}
-
-              {/* View: Review Timeline */}
-              {activeTab === 'review-process' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Peer Review Timeline</h2>
-                  <div className="space-y-3 text-sm text-gray-700">
-                    <div className="p-3 bg-gray-50 rounded border"><strong>1. Desk Review:</strong> 1–2 weeks (Initial scope & similarity check).</div>
-                    <div className="p-3 bg-gray-50 rounded border"><strong>2. Double-Blind Review:</strong> 4–6 weeks (External expert evaluation).</div>
-                    <div className="p-3 bg-gray-50 rounded border"><strong>3. Revision Window:</strong> 2–3 weeks (Author adjustments).</div>
-                    <div className="p-3 bg-gray-50 rounded border"><strong>4. Publication:</strong> Issues released bi-annually (January & June).</div>
-                  </div>
-                </div>
-              )}
-
-              {/* View: Submit Manuscript Form */}
+              {/* View: Manuscript Submission */}
               {activeTab === 'submit-paper' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-6">Submit Manuscript</h2>
-                  <form onSubmit={handleFormSubmit} className="space-y-4 text-xs sm:text-sm">
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-900 border-b pb-3 mb-4">Submit Manuscript</h2>
+                  <form onSubmit={handleFormSubmit} className="space-y-4 text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-semibold mb-1">Author Name</label>
+                        <label className="block font-bold mb-1">Author Full Name</label>
                         <input 
-                          type="text" required value={formData.author_name} 
+                          type="text" required value={formData.author_name}
                           onChange={e => setFormData({...formData, author_name: e.target.value})}
-                          className="w-full p-2 border rounded" placeholder="e.g. Dr. Jane Doe" 
+                          className="w-full p-2 border rounded focus:ring-1 focus:ring-blue-900" 
                         />
                       </div>
                       <div>
-                        <label className="block font-semibold mb-1">Author Email</label>
+                        <label className="block font-bold mb-1">Author Email</label>
                         <input 
-                          type="email" required value={formData.author_email} 
+                          type="email" required value={formData.author_email}
                           onChange={e => setFormData({...formData, author_email: e.target.value})}
-                          className="w-full p-2 border rounded" placeholder="e.g. jane@uok.edu.et" 
+                          className="w-full p-2 border rounded focus:ring-1 focus:ring-blue-900" 
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-1">Manuscript Title</label>
+                      <label className="block font-bold mb-1">Manuscript Title</label>
                       <input 
-                        type="text" required value={formData.title} 
+                        type="text" required value={formData.title}
                         onChange={e => setFormData({...formData, title: e.target.value})}
-                        className="w-full p-2 border rounded" placeholder="Full paper title..." 
+                        className="w-full p-2 border rounded focus:ring-1 focus:ring-blue-900" 
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-semibold mb-1">Category</label>
+                        <label className="block font-bold mb-1">Category</label>
                         <select 
-                          value={formData.category} 
+                          value={formData.category}
                           onChange={e => setFormData({...formData, category: e.target.value})}
                           className="w-full p-2 border rounded bg-white"
                         >
@@ -604,9 +482,9 @@
                         </select>
                       </div>
                       <div>
-                        <label className="block font-semibold mb-1">Manuscript Type</label>
+                        <label className="block font-bold mb-1">Type</label>
                         <select 
-                          value={formData.manuscript_type} 
+                          value={formData.manuscript_type}
                           onChange={e => setFormData({...formData, manuscript_type: e.target.value})}
                           className="w-full p-2 border rounded bg-white"
                         >
@@ -620,19 +498,20 @@
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-1">Abstract</label>
+                      <label className="block font-bold mb-1">Abstract</label>
                       <textarea 
-                        rows="4" required value={formData.abstract} 
+                        rows="4" required value={formData.abstract}
                         onChange={e => setFormData({...formData, abstract: e.target.value})}
-                        className="w-full p-2 border rounded" placeholder="Write manuscript abstract..."
+                        className="w-full p-2 border rounded focus:ring-1 focus:ring-blue-900"
                       ></textarea>
                     </div>
 
                     <button 
                       type="submit" 
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded shadow transition"
+                      disabled={isSendingEmail}
+                      className="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2 rounded transition shadow"
                     >
-                      Submit Manuscript
+                      {isSendingEmail ? "Dispatching Submission..." : "Submit Paper"}
                     </button>
                   </form>
                 </div>
@@ -640,142 +519,102 @@
 
               {/* View: Track Status */}
               {activeTab === 'track-manuscript' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-6">Manuscript Submissions Tracker</h2>
-                  <div className="space-y-4">
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-bold text-gray-900 border-b pb-3 mb-4">Track Manuscript</h2>
+                  <div className="space-y-3">
                     {submissions.map(sub => (
-                      <div key={sub.id} className="p-4 border rounded-lg bg-gray-50 flex flex-col sm:flex-row justify-between gap-4">
+                      <div key={sub.id} className="p-3 border rounded bg-gray-50 flex justify-between items-center">
                         <div>
-                          <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
-                            {sub.manuscript_id}
-                          </span>
-                          <h3 className="font-bold text-sm mt-1">{sub.title}</h3>
-                          <p className="text-xs text-gray-600 mt-1">Author: {sub.author_name} ({sub.author_email})</p>
-                          <p className="text-xs text-gray-400 mt-0.5">Submitted on: {sub.submitted_at}</p>
+                          <span className="text-[10px] font-bold bg-blue-900 text-white px-2 py-0.5 rounded">{sub.manuscript_id}</span>
+                          <h4 className="text-xs font-bold mt-1">{sub.title}</h4>
+                          <p className="text-[11px] text-gray-500">Author: {sub.author_name}</p>
                         </div>
-                        <div className="sm:text-right flex-shrink-0">
-                          <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                            sub.status === 'Published' ? 'bg-green-100 text-green-800' :
-                            sub.status === 'Under Review' ? 'bg-amber-100 text-amber-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {sub.status}
-                          </span>
-                        </div>
+                        <span className="text-xs font-bold bg-blue-100 text-blue-900 px-3 py-1 rounded">
+                          {sub.status}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* View: Editor Dashboard */}
+              {/* View: Editor Control Dashboard */}
               {activeTab === 'editor-dashboard' && currentUser?.role === 'Editor' && (
-                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-emerald-200">
-                  <div className="border-b pb-4 mb-6 flex justify-between items-center">
-                    <div>
-                      <h2 className="text-2xl font-bold text-emerald-900">Editor Control Panel</h2>
-                      <p className="text-xs text-emerald-700 mt-0.5">Logged in as {currentUser.name}</p>
-                    </div>
-                    <span className="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-bold">
-                      Chief Editor Access
-                    </span>
-                  </div>
-
-                  <div className="space-y-4">
+                <div className="bg-white p-6 rounded-md shadow-sm border border-emerald-300">
+                  <h2 className="text-xl font-bold text-emerald-950 border-b pb-3 mb-4">Editor Workflow Dashboard</h2>
+                  <div className="space-y-3">
                     {submissions.map(sub => (
-                      <div key={sub.id} className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+                      <div key={sub.id} className="p-3 border rounded flex justify-between items-center bg-gray-50">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded">{sub.manuscript_id}</span>
-                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{sub.category}</span>
-                          </div>
-                          <h3 className="font-bold text-sm mt-1">{sub.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1">Author: {sub.author_name} • {sub.author_email}</p>
+                          <span className="text-xs font-bold text-blue-900">{sub.manuscript_id}</span>
+                          <p className="text-xs font-bold">{sub.title}</p>
+                          <p className="text-[11px] text-gray-500">{sub.author_email}</p>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <label className="text-xs font-bold text-gray-600">Status:</label>
-                          <select 
-                            value={sub.status} 
-                            onChange={(e) => updateStatus(sub.id, e.target.value)}
-                            className="text-xs p-1.5 border rounded bg-gray-50 font-semibold"
-                          >
-                            <option>Submitted</option>
-                            <option>Under Review</option>
-                            <option>Revision Requested</option>
-                            <option>Accepted</option>
-                            <option>Rejected</option>
-                            <option>Published</option>
-                          </select>
-                        </div>
+                        <select 
+                          value={sub.status}
+                          onChange={(e) => updateStatus(sub.id, e.target.value)}
+                          className="text-xs p-1 border rounded font-semibold bg-white"
+                        >
+                          <option>Submitted</option>
+                          <option>Under Review</option>
+                          <option>Revision Requested</option>
+                          <option>Accepted</option>
+                          <option>Rejected</option>
+                          <option>Published</option>
+                        </select>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* View: Standard Static Content (About/Scope/Ethics/Guidelines/APC/Timeline) */}
+              {['about', 'aims-scope', 'ethics-policy', 'author-guidelines', 'apc-info', 'review-process'].includes(activeTab) && (
+                <div className="bg-white p-6 rounded-md shadow-sm border border-gray-200 text-xs leading-relaxed space-y-3">
+                  <h2 className="text-xl font-bold text-gray-900 border-b pb-2 capitalize">{activeTab.replace('-', ' ')}</h2>
+                  <p>Journal of Integrative Science Development (JISD) is published bi-annually by the Research, Publication and Ethics Dissemination Directorate (RPEDD) at the University of Kabridahar, Ethiopia.</p>
+                  <p>All submitted manuscripts are subjected to double-blind peer review. JISD levies zero publication fees or APCs for accepted works.</p>
                 </div>
               )}
 
             </main>
           </div>
 
-          {/* Login Modal */}
+          {/* LOGIN MODAL */}
           {showLoginModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Editor Sign In</h3>
-                  <button 
-                    onClick={() => setShowLoginModal(false)}
-                    className="text-gray-400 hover:text-gray-600 text-xl font-bold"
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                {loginError && (
-                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded">
-                    {loginError}
-                  </div>
-                )}
-
-                <form onSubmit={handleLogin} className="space-y-4">
+              <div className="bg-white rounded-md shadow-xl w-full max-w-sm p-5">
+                <h3 className="text-base font-bold text-gray-900 border-b pb-2 mb-3">Editor Access</h3>
+                {loginError && <p className="text-xs text-red-600 mb-2">{loginError}</p>}
+                <form onSubmit={handleLogin} className="space-y-3 text-xs">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
+                    <label className="block font-bold mb-1">Email</label>
                     <input 
-                      type="email"
-                      required
-                      placeholder="mekuria.tsegaye20@uok.edu.et"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      className="w-full text-sm p-2.5 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                      type="email" required value={loginEmail}
+                      onChange={e => setLoginEmail(e.target.value)}
+                      className="w-full p-2 border rounded" placeholder="mekuria.tsegaye20@uok.edu.et"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+                    <label className="block font-bold mb-1">Password</label>
                     <input 
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="w-full text-sm p-2.5 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                      type="password" required value={loginPassword}
+                      onChange={e => setLoginPassword(e.target.value)}
+                      className="w-full p-2 border rounded" placeholder="••••••••"
                     />
                   </div>
-                  <button 
-                    type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2.5 rounded-md transition"
-                  >
-                    Log In
-                  </button>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button type="button" onClick={() => setShowLoginModal(false)} className="px-3 py-1 text-gray-500">Cancel</button>
+                    <button type="submit" className="bg-blue-900 text-white px-4 py-1.5 rounded font-bold">Log In</button>
+                  </div>
                 </form>
               </div>
             </div>
           )}
 
-          {/* Footer */}
-          <footer className="bg-gray-900 text-gray-400 text-xs py-6 mt-auto border-t border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 text-center">
-              <p>© {new Date().getFullYear()} Journal of Integrative Science Development (JISD) • University of Kabridahar</p>
-            </div>
+          {/* FOOTER */}
+          <footer className="bg-gray-900 text-gray-400 text-xs py-4 text-center mt-auto">
+            <p>© {new Date().getFullYear()} Journal of Integrative Science Development (JISD) • University of Kabridahar</p>
           </footer>
         </div>
       );
