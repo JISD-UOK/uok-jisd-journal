@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Journal of Integrative Science Development (JISD) | UoK</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --navy-primary: #002B49;
@@ -20,7 +21,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font-stack); background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
 
-    /* Header & Navigation */
     header { background-color: var(--navy-primary); border-bottom: 4px solid var(--gold-accent); position: sticky; top: 0; z-index: 100; }
     .header-container { max-width: 1200px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
     .brand-group { display: flex; align-items: center; gap: 1rem; }
@@ -33,11 +33,9 @@
     .nav-btn:hover, .nav-btn.active { color: #FFF; background-color: rgba(255, 255, 255, 0.1); }
     .btn-portal-cta { background-color: var(--gold-accent); color: var(--navy-primary); font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
 
-    /* Container */
     .main-layout { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; display: grid; grid-template-columns: 2.8fr 1fr; gap: 2rem; }
     @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
 
-    /* Cards & Content Views */
     .view-section { display: none; }
     .view-section.active { display: block; }
     .card { background: var(--card-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.75rem; margin-bottom: 1.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -49,14 +47,12 @@
     .scope-card h3 { font-size: 0.9rem; color: var(--navy-primary); margin-bottom: 0.25rem; }
     .scope-card p { font-size: 0.8rem; color: var(--text-muted); }
 
-    /* Forms & Inputs */
     .form-group { margin-bottom: 1.2rem; }
     .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy-primary); margin-bottom: 0.35rem; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; font-family: inherit; }
     .btn-action { background-color: var(--navy-primary); color: #FFF; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; width: 100%; }
     .btn-action:hover { background-color: var(--blue-secondary); }
 
-    /* Multi-Role Switcher Tabs */
     .role-switcher { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 1.2rem; }
     .role-btn { flex: 1; padding: 0.6rem; background: none; border: none; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; }
     .role-btn.active { color: var(--navy-primary); border-bottom-color: var(--blue-secondary); background: rgba(0,86,145,0.04); }
@@ -70,7 +66,6 @@
 </head>
 <body>
 
-  <!-- HEADER & NAVBAR -->
   <header>
     <div class="header-container">
       <div class="brand-group">
@@ -90,118 +85,100 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
   <div class="main-layout">
     <main>
 
-      <!-- VIEW 1: HOME PAGE -->
       <section id="view-home" class="view-section active">
         <div class="callout-box">
-          <p><strong>Call for Papers (Inaugural Issue):</strong> Double-blind peer review system[cite: 1]. <strong>No publication fees</strong> for the inaugural issue[cite: 1].</p>
-          <p><strong>Submission Deadline:</strong> June 10, 2026[cite: 1]</p>
+          <p><strong>Call for Papers (Inaugural Issue):</strong> Double-blind peer review system. <strong>No publication fees</strong> for the inaugural issue.</p>
+          <p><strong>Submission Deadline:</strong> June 10, 2026</p>
         </div>
 
         <div class="card">
           <h2>About the Journal (UoK - JISD)</h2>
-          <p>UoK JISD serves as a dynamic forum for intellectual exchange on issues affecting humanity and transformative interventions[cite: 1]. We bridge the gap between science, technology, and society through high-quality interdisciplinary research and meaningful knowledge transfer[cite: 1].</p>
+          <p>UoK JISD serves as a dynamic forum for intellectual exchange on issues affecting humanity and transformative interventions. We bridge the gap between science, technology, and society through high-quality interdisciplinary research and meaningful knowledge transfer.</p>
         </div>
 
         <div class="card">
           <h2>Scope of the Journal</h2>
           <div class="scope-grid">
-            <div class="scope-card"><h3>1. Social Sciences & Humanities</h3><p>Law, Sociology, Peace & Conflict, Tourism, Urban Planning[cite: 1].</p></div>
-            <div class="scope-card"><h3>2. Business & Economics</h3><p>Economics, Accounting, Finance, Logistics, Public Admin[cite: 1].</p></div>
-            <div class="scope-card"><h3>3. Natural & Computational</h3><p>Biology, Chemistry, Physics, Mathematics, Statistics[cite: 1].</p></div>
-            <div class="scope-card"><h3>4. Engineering & Technology</h3><p>Petroleum, Civil, Software, Computer Science, IT[cite: 1].</p></div>
-            <div class="scope-card"><h3>5. Health Sciences</h3><p>Public Health, Medicine, Nursing, Midwifery, Pharmacy, Nutrition[cite: 1].</p></div>
+            <div class="scope-card"><h3>1. Social Sciences & Humanities</h3><p>Law, Sociology, Peace & Conflict, Tourism, Urban Planning.</p></div>
+            <div class="scope-card"><h3>2. Business & Economics</h3><p>Economics, Accounting, Finance, Logistics, Public Admin.</p></div>
+            <div class="scope-card"><h3>3. Natural & Computational</h3><p>Biology, Chemistry, Physics, Mathematics, Statistics.</p></div>
+            <div class="scope-card"><h3>4. Engineering & Technology</h3><p>Petroleum, Civil, Software, Computer Science, IT.</p></div>
+            <div class="scope-card"><h3>5. Health Sciences</h3><p>Public Health, Medicine, Nursing, Midwifery, Pharmacy, Nutrition.</p></div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 2: CURRENT & ARCHIVES -->
       <section id="view-issues" class="view-section">
         <div class="card">
           <h2>Inaugural Issue (Vol 1, No 1 - 2026)</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Submissions currently open for the inaugural publication cycle[cite: 1]. Published articles will appear here in open-access format.</p>
-          
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Submissions currently open for the inaugural publication cycle. Published articles will appear here in open-access format.</p>
           <div style="border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; background: var(--bg-light);">
             <span style="font-size: 0.75rem; background: var(--blue-secondary); color: #FFF; padding: 2px 6px; border-radius: 3px; font-weight: 600;">FORTHCOMING</span>
             <h3 style="font-size: 1rem; margin-top: 0.4rem; color: var(--navy-primary);">Inaugural Print & Digital Issue</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Print Version ISBN Recognition Included[cite: 1].</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Print Version ISBN Recognition Included.</p>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 3: AUTHOR GUIDELINES -->
       <section id="view-guidelines" class="view-section">
         <div class="card">
           <h2>Manuscript Submission Guidelines</h2>
           <ul style="padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.8;">
-            <li><strong>Language & Originality:</strong> Manuscripts must be written in English, original, and not under consideration elsewhere[cite: 1].</li>
-            <li><strong>File Format:</strong> Only Microsoft Word format (`.doc`, `.docx`) is accepted[cite: 1].</li>
-            <li><strong>Free Formatting:</strong> Initial submissions may be made in free format with minimal formatting requirements[cite: 1].</li>
-            <li><strong>Peer Review Model:</strong> All submissions undergo a rigorous <strong>double-blind peer review process</strong>[cite: 1]. Ensure no author names or institutional affiliations appear within the file body[cite: 1].</li>
+            <li><strong>Language & Originality:</strong> Manuscripts must be written in English, original, and not under consideration elsewhere.</li>
+            <li><strong>File Format:</strong> Only Microsoft Word format (`.doc`, `.docx`) is accepted.</li>
+            <li><strong>Free Formatting:</strong> Initial submissions may be made in free format with minimal formatting requirements.</li>
+            <li><strong>Peer Review Model:</strong> All submissions undergo a double-blind peer review process. Ensure no author names or institutional affiliations appear within the file body.</li>
           </ul>
-
-          <h3 style="margin-top: 1.5rem; font-size: 1rem; color: var(--navy-primary);">Manuscript Categories & Lengths</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem;">
-            <tr style="background: var(--bg-light); text-align: left;"><th style="padding: 0.5rem; border: 1px solid var(--border-color);">Category</th><th style="padding: 0.5rem; border: 1px solid var(--border-color);">Word Count Limit</th></tr>
-            <tr><td style="padding: 0.5rem; border: 1px solid var(--border-color);">Original Research Articles[cite: 1]</td><td style="padding: 0.5rem; border: 1px solid var(--border-color);">5,000 – 8,000 words[cite: 1]</td></tr>
-            <tr><td style="padding: 0.5rem; border: 1px solid var(--border-color);">Review Articles[cite: 1]</td><td style="padding: 0.5rem; border: 1px solid var(--border-color);">5,000 – 8,000 words[cite: 1]</td></tr>
-            <tr><td style="padding: 0.5rem; border: 1px solid var(--border-color);">Case Studies[cite: 1]</td><td style="padding: 0.5rem; border: 1px solid var(--border-color);">5,000 – 8,000 words[cite: 1]</td></tr>
-            <tr><td style="padding: 0.5rem; border: 1px solid var(--border-color);">Short Communications[cite: 1]</td><td style="padding: 0.5rem; border: 1px solid var(--border-color);">≤ 3,000 words[cite: 1]</td></tr>
-            <tr><td style="padding: 0.5rem; border: 1px solid var(--border-color);">Policy Briefs[cite: 1]</td><td style="padding: 0.5rem; border: 1px solid var(--border-color);">800 – 1,600 words[cite: 1]</td></tr>
-          </table>
         </div>
       </section>
 
-      <!-- VIEW 4: PORTAL ACCESS & SUBMISSION FORM -->
       <section id="view-portal" class="view-section">
         <div class="card">
-          <h2>Author Submission Form</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Complete all required fields to submit your manuscript for peer review[cite: 1].</p>
+          <h2>Author Manuscript Submission Portal</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">Complete all fields below. Files are uploaded directly to the database.</p>
           
-          <form action="https://formspree.io/f/YOUR_FORMSPREE_KEY_HERE" method="POST" enctype="multipart/form-data">
-            <div class="form-group"><label>Corresponding Author Name *</label><input type="text" name="author_name" required></div>
-            <div class="form-group"><label>Corresponding Author Email *</label><input type="email" name="author_email" required></div>
-            <div class="form-group"><label>Institutional Affiliation *</label><input type="text" name="affiliation" required></div>
-            <div class="form-group"><label>Manuscript Title *</label><input type="text" name="title" required></div>
+          <form id="submissionForm">
+            <div class="form-group"><label>Corresponding Author Name *</label><input type="text" id="author_name" required></div>
+            <div class="form-group"><label>Corresponding Author Email *</label><input type="email" id="author_email" required></div>
+            <div class="form-group"><label>Institutional Affiliation *</label><input type="text" id="affiliation" required></div>
+            <div class="form-group"><label>Manuscript Title *</label><input type="text" id="title" required></div>
             <div class="form-group">
               <label>Academic Domain *</label>
-              <select name="domain" required>
+              <select id="domain" required>
                 <option value="" disabled selected>Select domain...</option>
-                <option>Social Sciences & Humanities[cite: 1]</option>
-                <option>Business & Economics[cite: 1]</option>
-                <option>Natural & Computational Sciences[cite: 1]</option>
-                <option>Engineering & Technology[cite: 1]</option>
-                <option>Health Sciences[cite: 1]</option>
+                <option>Social Sciences & Humanities</option>
+                <option>Business & Economics</option>
+                <option>Natural & Computational Sciences</option>
+                <option>Engineering & Technology</option>
+                <option>Health Sciences</option>
               </select>
             </div>
             <div class="form-group">
               <label>Manuscript Type *</label>
-              <select name="type" required>
+              <select id="type" required>
                 <option value="" disabled selected>Select manuscript type...</option>
-                <option>Original Research Article (5,000-8,000 words)[cite: 1]</option>
-                <option>Review Article (5,000-8,000 words)[cite: 1]</option>
-                <option>Case Study (5,000-8,000 words)[cite: 1]</option>
-                <option>Short Communication (≤ 3,000 words)[cite: 1]</option>
-                <option>Policy Brief (800-1,600 words)[cite: 1]</option>
+                <option>Original Research Article (5,000-8,000 words)</option>
+                <option>Review Article (5,000-8,000 words)</option>
+                <option>Case Study (5,000-8,000 words)</option>
+                <option>Short Communication (≤ 3,000 words)</option>
+                <option>Policy Brief (800-1,600 words)</option>
               </select>
             </div>
-            <div class="form-group"><label>Abstract *</label><textarea name="abstract" rows="4" required></textarea></div>
-            <div class="form-group"><label>Upload Manuscript File (.doc, .docx) *</label><input type="file" name="manuscript_file" accept=".doc,.docx" required></div>
-            <button type="submit" class="btn-action">Submit Manuscript to JISD</button>
+            <div class="form-group"><label>Abstract *</label><textarea id="abstract" rows="4" required></textarea></div>
+            <div class="form-group"><label>Upload Manuscript File (.doc, .docx) *</label><input type="file" id="manuscript_file" accept=".doc,.docx" required></div>
+            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript to JISD</button>
           </form>
         </div>
       </section>
 
     </main>
 
-    <!-- RIGHT SIDEBAR: AUTH PORTAL & CONTACTS -->
     <aside>
       <div class="card">
         <h2>User Portal</h2>
-        
         <div class="auth-toggle">
           <button id="btn-mode-login" class="active" onclick="toggleAuthMode('login')">Login</button>
           <button id="btn-mode-reg" onclick="toggleAuthMode('register')">Register</button>
@@ -230,9 +207,9 @@
 
       <div class="card">
         <h2>Editorial Contacts</h2>
-        <p style="font-size: 0.85rem;"><strong>Editor-in-Chief:</strong><br>Dr. Mekuria Tsegaye[cite: 1]</p>
+        <p style="font-size: 0.85rem;"><strong>Editor-in-Chief:</strong><br>Dr. Mekuria Tsegaye</p>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; word-break: break-all;">
-          <strong>Submissions:</strong><br><a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>[cite: 1]
+          <strong>Submissions:</strong><br><a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>
         </p>
       </div>
     </aside>
@@ -243,12 +220,15 @@
   </footer>
 
   <script>
-    let currentRole = 'Author';
+    // 1. SUPABASE INITIALIZATION
+    const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co"; // Replace with Project Settings -> API URL
+    const SUPABASE_ANON_KEY = "sb_publishable_2LRWZkOlyvxCdnEZCBd4Uw_3EeXy84_";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // 2. NAV & UI LOGIC
     function switchView(viewId, element) {
       document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-btn, .btn-portal-cta').forEach(btn => btn.classList.remove('active'));
-      
       document.getElementById(`view-${viewId}`).classList.add('active');
       if (element) element.classList.add('active');
     }
@@ -256,20 +236,62 @@
     function toggleAuthMode(mode) {
       document.getElementById('btn-mode-login').classList.toggle('active', mode === 'login');
       document.getElementById('btn-mode-reg').classList.toggle('active', mode === 'register');
-      
       document.getElementById('auth-form-login').style.display = (mode === 'login') ? 'block' : 'none';
       document.getElementById('auth-form-register').style.display = (mode === 'register') ? 'block' : 'none';
-      document.getElementById('editor-tab-btn').style.display = (mode === 'register') ? 'none' : 'block';
     }
 
     function setRole(role, element) {
-      currentRole = role;
       document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
       element.classList.add('active');
-
       document.getElementById('login-label').innerText = `Login as ${role}`;
       document.getElementById('reg-label').innerText = `Register as ${role}`;
     }
+
+    // 3. MANUSCRIPT UPLOAD & DATABASE INSERT
+    document.getElementById('submissionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "Uploading Manuscript...";
+      btn.disabled = true;
+
+      try {
+        const fileInput = document.getElementById('manuscript_file');
+        const file = fileInput.files[0];
+        const filePath = `${Date.now()}_${file.name}`;
+
+        // Upload file to Supabase Storage Bucket
+        const { data: uploadData, error: uploadError } = await db.storage
+          .from('manuscripts')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Fetch Public File URL
+        const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+
+        // Insert record into PostgreSQL database table
+        const { error: dbError } = await db.from('submissions').insert([{
+          author_name: document.getElementById('author_name').value,
+          author_email: document.getElementById('author_email').value,
+          affiliation: document.getElementById('affiliation').value,
+          title: document.getElementById('title').value,
+          domain: document.getElementById('domain').value,
+          manuscript_type: document.getElementById('type').value,
+          abstract: document.getElementById('abstract').value,
+          file_url: urlData.publicUrl
+        }]);
+
+        if (dbError) throw dbError;
+
+        alert("Manuscript uploaded successfully! Submission recorded in Supabase.");
+        document.getElementById('submissionForm').reset();
+      } catch (err) {
+        alert("Submission failed: " + err.message);
+      } finally {
+        btn.innerText = "Submit Manuscript to JISD";
+        btn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
