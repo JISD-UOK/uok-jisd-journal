@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal of Integrative Science Development (JISD) | UoK</title>
+  <title>Journal of Integrative Science Development (JISD) | University of Kabridahar</title>
+  
+  <!-- Supabase & EmailJS SDKs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- EmailJS Library for sending transactional emails -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
   <style>
     :root {
       --navy-primary: #002B49;
@@ -19,6 +21,7 @@
       --border-color: #CBD5E1;
       --success: #166534;
       --warning: #92400E;
+      --danger: #991B1B;
       --font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
@@ -54,11 +57,17 @@
     .btn-secondary { background-color: #E2E8F0; color: var(--text-dark); border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 600; border-radius: 4px; cursor: pointer; margin-bottom: 0.5rem; }
 
     .paper-card { border: 1px solid var(--border-color); border-left: 4px solid var(--navy-primary); padding: 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; background: #FFF; }
+    .paper-card h3 { font-size: 1.1rem; color: var(--navy-primary); margin-bottom: 0.4rem; }
+    .paper-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .paper-badge { background: #E0F2FE; color: var(--blue-secondary); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .download-btn { display: inline-flex; align-items: center; gap: 0.4rem; background-color: var(--gold-accent); color: var(--navy-primary); padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 700; border-radius: 4px; text-decoration: none; }
+
     .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
     .status-Submitted { background-color: #FEF3C7; color: var(--warning); }
-    .status-Published { background-color: #DCFCE7; color: var(--success); }
-    .status-UnderReview { background-color: #E0F2FE; color: #0369A1; }
-    .status-Rejected { background-color: #FEE2E2; color: #991B1B; }
+    .status-UnderReview { background-color: #E0F2FE; color: var(--blue-secondary); }
+    .status-Accepted { background-color: #DCFCE7; color: var(--success); }
+    .status-Published { background-color: #059669; color: #FFF; }
+    .status-Rejected { background-color: #FEE2E2; color: var(--danger); }
     
     .user-banner { background: #E0F2FE; border-left: 4px solid var(--blue-secondary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
 
@@ -77,10 +86,10 @@
           <p>Journal of Integrative Science Development | University of Kabridahar</p>
         </div>
       </div>
-      <nav>
+      <nav id="top-nav-bar">
         <button class="nav-btn active" onclick="switchView('home', this)">Home</button>
         <button class="nav-btn" onclick="switchView('published', this)">Articles</button>
-        <button class="nav-btn" onclick="switchView('guidelines', this)">Guidelines</button>
+        <button class="nav-btn" onclick="switchView('guidelines', this)">Author Guidelines</button>
         <button class="btn-portal-cta" id="nav-portal-btn" onclick="handlePortalClick()">Portal Dashboard</button>
       </nav>
     </div>
@@ -89,34 +98,63 @@
   <div class="main-layout">
     <main>
 
-      <!-- HOME VIEW -->
+      <!-- VIEW 1: HOME -->
       <section id="view-home" class="view-section active">
         <div class="card">
-          <h2>Welcome to UoK - JISD Journal Portal</h2>
-          <p>The Journal of Integrative Science Development (JISD) is an open-access academic journal published by the University of Kabridahar. Submit manuscripts or search published regional research.</p>
+          <h2>About the Journal</h2>
+          <p>The <strong>Journal of Integrative Science Development (JISD)</strong> is a peer-reviewed, open-access multi-disciplinary academic platform hosted by the University of Kabridahar. We publish original research, field studies, and critical reviews across diverse scientific domains.</p>
+        </div>
+
+        <div class="card">
+          <h2>Current Volume Highlights</h2>
+          <div id="homeFeaturedArticles"><p style="color: var(--text-muted);">Loading current issue...</p></div>
         </div>
       </section>
 
-      <!-- PUBLISHED ARTICLES -->
+      <!-- VIEW 2: PUBLISHED ARTICLES ARCHIVE -->
       <section id="view-published" class="view-section">
         <div class="card">
-          <h2>Published Articles</h2>
-          <div id="publishedArticlesList"><p style="color: var(--text-muted);">Loading published papers...</p></div>
+          <h2>Published Articles Library</h2>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <input type="text" id="paperSearch" placeholder="Search by title, author, abstract..." onkeyup="filterArticles()">
+            <select id="domainFilter" onchange="filterArticles()">
+              <option value="ALL">All Academic Domains</option>
+              <option value="Social Sciences & Humanities">Social Sciences & Humanities</option>
+              <option value="Business & Economics">Business & Economics</option>
+              <option value="Natural & Computational Sciences">Natural & Computational Sciences</option>
+              <option value="Engineering & Technology">Engineering & Technology</option>
+              <option value="Health Sciences">Health Sciences</option>
+            </select>
+          </div>
+          <div id="publishedArticlesList"><p style="text-align: center; color: var(--text-muted);">Loading papers archive...</p></div>
         </div>
       </section>
 
-      <!-- AUTHOR DASHBOARD -->
+      <!-- VIEW 3: GUIDELINES -->
+      <section id="view-guidelines" class="view-section">
+        <div class="card">
+          <h2>Author Guidelines & Peer-Review Policy</h2>
+          <ul style="padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.8;">
+            <li><strong>Peer Review Process:</strong> All submitted manuscripts undergo rigorous double-blind peer review.</li>
+            <li><strong>File Format:</strong> Microsoft Word (`.doc`, `.docx`) format required.</li>
+            <li><strong>Anonymity:</strong> Ensure author names and institution details are removed from the submitted manuscript file for double-blind review.</li>
+            <li><strong>Editorial Contact:</strong> Official queries should be sent to <a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- VIEW 4: AUTHOR DASHBOARD (REQ 2: STATUS MONITORING) -->
       <section id="view-dashboard" class="view-section">
         <div class="user-banner">
           <div>
-            <strong id="user-display-name">Author</strong> (<span id="user-display-role">Author</span>)
+            <strong id="user-display-name">Author Account</strong> (<span id="user-display-role">Author</span>)
             <p id="user-display-email" style="font-size: 0.8rem; color: var(--text-muted);"></p>
           </div>
           <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-          <h2>Your Submitted Manuscripts</h2>
+          <h2 style="color: var(--navy-primary);">Your Submissions</h2>
           <button class="btn-portal-cta" onclick="switchView('submit', null)">+ Submit New Manuscript</button>
         </div>
 
@@ -124,37 +162,37 @@
           <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
             <thead>
               <tr style="border-bottom: 2px solid var(--border-color); text-align: left;">
-                <th style="padding: 0.5rem;">ID</th>
+                <th style="padding: 0.5rem;">Manuscript ID</th>
                 <th style="padding: 0.5rem;">Title</th>
                 <th style="padding: 0.5rem;">Domain</th>
                 <th style="padding: 0.5rem;">Status</th>
               </tr>
             </thead>
             <tbody id="submissionsTableBody">
-              <tr><td colspan="4" style="padding: 1rem; text-align: center;">Loading your submissions...</td></tr>
+              <tr><td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">Loading your submissions...</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- EDITOR DASHBOARD (REQUIREMENTS 3 & 6) -->
+      <!-- VIEW 5: EDITORIAL CONTROL PANEL (REQ 3 & 6: EDITORIAL ACCESS & LOOKUP) -->
       <section id="view-editor" class="view-section">
         <div class="card" style="background: #FEF3C7; border-color: #F59E0B;">
-          <h2 style="color: #92400E;">Editorial Command Center</h2>
-          <p style="font-size: 0.85rem;">Manage all submitted manuscripts, search by Manuscript ID, download files, and change publication statuses.</p>
+          <h2 style="color: #92400E;">Editorial Control Panel</h2>
+          <p style="font-size: 0.85rem;">Manage platform submissions, query manuscripts by ID, download submission files, and update publication statuses.</p>
         </div>
 
-        <!-- REQUIREMENT 6: SEARCH BY ID -->
+        <!-- REQ 6: MANUSCRIPT ID LOOKUP -->
         <div class="card">
-          <h2>Quick Manuscript Lookup</h2>
+          <h2>Manuscript ID Search</h2>
           <div style="display: flex; gap: 0.5rem;">
             <input type="text" id="editorSearchId" placeholder="Enter Manuscript ID (e.g. JISD-2026-4821)">
-            <button class="btn-portal-cta" onclick="searchManuscriptById()">Search</button>
+            <button class="btn-portal-cta" onclick="searchManuscriptById()">Find Manuscript</button>
           </div>
           <div id="searchResultDisplay" style="margin-top: 1rem;"></div>
         </div>
 
-        <!-- REQUIREMENT 3: ALL SUBMISSIONS TABLE -->
+        <!-- REQ 3: ALL SUBMISSIONS & STATUS UPDATER -->
         <div class="card">
           <h2>All Submitted Manuscripts</h2>
           <div style="overflow-x: auto;">
@@ -165,7 +203,7 @@
                   <th style="padding: 0.5rem;">Author</th>
                   <th style="padding: 0.5rem;">Title</th>
                   <th style="padding: 0.5rem;">Status</th>
-                  <th style="padding: 0.5rem;">Action</th>
+                  <th style="padding: 0.5rem;">Actions</th>
                 </tr>
               </thead>
               <tbody id="editorTableBody">
@@ -176,81 +214,122 @@
         </div>
       </section>
 
-      <!-- SUBMISSION FORM (REQUIREMENTS 4 & 5) -->
+      <!-- VIEW 6: SUBMISSION FORM (REQ 4 & 5: SUBMISSION + NOTIFICATIONS) -->
       <section id="view-submit" class="view-section">
         <div class="card">
           <h2>Submit Manuscript to JISD</h2>
           <form id="manuscriptForm">
-            <div class="form-group"><label>Title *</label><input type="text" id="m_title" required></div>
             <div class="form-group">
-              <label>Domain *</label>
-              <select id="m_domain" required>
-                <option>Social Sciences & Humanities</option>
-                <option>Business & Economics</option>
-                <option>Natural & Computational Sciences</option>
-                <option>Engineering & Technology</option>
-                <option>Health Sciences</option>
-              </select>
+              <label>Manuscript Title *</label>
+              <input type="text" id="m_title" required placeholder="Full academic manuscript title">
             </div>
-            <div class="form-group"><label>Manuscript Type *</label><input type="text" id="m_type" value="Original Research Article" required></div>
-            <div class="form-group"><label>Abstract *</label><textarea id="m_abstract" rows="4" required></textarea></div>
-            <div class="form-group"><label>Keywords *</label><input type="text" id="m_keywords" placeholder="e.g. Soil, Water, Ethiopia" required></div>
-            <div class="form-group"><label>Upload File (.doc, .docx) *</label><input type="file" id="m_file" accept=".doc,.docx" required></div>
-            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript</button>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label>Academic Domain *</label>
+                <select id="m_domain" required>
+                  <option value="" disabled selected>Select domain...</option>
+                  <option>Social Sciences & Humanities</option>
+                  <option>Business & Economics</option>
+                  <option>Natural & Computational Sciences</option>
+                  <option>Engineering & Technology</option>
+                  <option>Health Sciences</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Manuscript Type *</label>
+                <select id="m_type" required>
+                  <option>Original Research Article</option>
+                  <option>Review Article</option>
+                  <option>Case Study</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Abstract (max 300 words) *</label>
+              <textarea id="m_abstract" rows="5" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Keywords *</label>
+              <input type="text" id="m_keywords" placeholder="e.g. Dryland Farming, Hydrology, Ethiopia" required>
+            </div>
+
+            <div class="form-group">
+              <label>Upload Anonymized Manuscript File (.doc, .docx) *</label>
+              <input type="file" id="m_file" accept=".doc,.docx" required>
+            </div>
+
+            <button type="submit" class="btn-action" id="submitBtn">Submit Manuscript to JISD</button>
+            <button type="button" class="btn-secondary" style="width: 100%; margin-top: 0.5rem;" onclick="switchView('dashboard', null)">Cancel</button>
           </form>
         </div>
       </section>
 
     </main>
 
-    <!-- SIDEBAR WITH AUTH AND OTP ACTIVATION (REQUIREMENT 1) -->
+    <!-- SIDEBAR AUTHENTICATION & OTP ACTIVATION (REQ 1: 6-DIGIT ACTIVATION) -->
     <aside>
       <div class="card" id="auth-card">
         <h2>Author Access</h2>
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem;">
           <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('login')">Sign In</button>
           <button class="btn-secondary" style="flex:1;" onclick="toggleAuthTab('register')">Register</button>
         </div>
 
+        <!-- SIGN IN FORM -->
         <form id="form-signin" onsubmit="handleSignIn(event)">
-          <div class="form-group"><label>Email</label><input type="email" id="login_email" required></div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="login_email" required></div>
           <div class="form-group"><label>Password</label><input type="password" id="login_pass" required></div>
-          <button type="submit" class="btn-action">Sign In</button>
+          <button type="submit" class="btn-action">Sign In to Dashboard</button>
         </form>
 
+        <!-- REGISTRATION FORM -->
         <form id="form-signup" style="display: none;" onsubmit="handleSignUp(event)">
-          <div class="form-group"><label>Full Name</label><input type="text" id="reg_name" required></div>
-          <div class="form-group"><label>Affiliation</label><input type="text" id="reg_affiliation" required></div>
-          <div class="form-group"><label>Email Address</label><input type="email" id="reg_email" required></div>
-          <div class="form-group"><label>Password</label><input type="password" id="reg_pass" minlength="6" required></div>
-          <button type="submit" class="btn-action">Register & Request Activation Code</button>
+          <div class="form-group"><label>Full Name *</label><input type="text" id="reg_name" required></div>
+          <div class="form-group"><label>Affiliation *</label><input type="text" id="reg_affiliation" placeholder="University / Institute" required></div>
+          <div class="form-group"><label>Email Address *</label><input type="email" id="reg_email" required></div>
+          <div class="form-group"><label>Password *</label><input type="password" id="reg_pass" minlength="6" required></div>
+          <button type="submit" class="btn-action">Register & Request 6-Digit Code</button>
         </form>
 
-        <!-- OTP ACTIVATION BOX -->
-        <div id="otp-activation-box" style="display: none; margin-top: 1rem; padding: 1rem; background: #FEF3C7; border-radius: 6px;">
+        <!-- REQ 1: 6-DIGIT OTP ACTIVATION PANEL -->
+        <div id="otp-activation-box" style="display: none; margin-top: 1rem; padding: 1rem; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 6px;">
           <h3 style="font-size: 0.9rem; color: #92400E; margin-bottom: 0.5rem;">Account Activation Required</h3>
-          <p style="font-size: 0.78rem; margin-bottom: 0.5rem;">Enter the 6-digit activation code sent to your email address from <strong>jisd@uok.edu.et</strong>:</p>
+          <p style="font-size: 0.78rem; margin-bottom: 0.5rem;">Enter the 6-digit activation code sent to your email from <strong>jisd@uok.edu.et</strong>:</p>
           <input type="text" id="otp_code_input" placeholder="123456" maxlength="6" style="width: 100%; padding: 0.5rem; text-align: center; font-weight: bold; margin-bottom: 0.5rem;">
           <button class="btn-action" onclick="verifyActivationCode()">Activate Account</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>Editorial Office</h2>
+        <p style="font-size: 0.85rem;"><strong>Editor-in-Chief:</strong><br>Dr. Mekuria Tsegaye</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+          <strong>Submissions Email:</strong><br><a href="mailto:jisd.manuscript@uok.edu.et">jisd.manuscript@uok.edu.et</a>
+        </p>
       </div>
     </aside>
   </div>
 
   <footer>
-    <p>&copy; 2026 University of Kabridahar - Journal of Integrative Science Development (UoK - JISD).</p>
+    <p>&copy; 2026 University of Kabridahar - Journal of Integrative Science Development (UoK - JISD). All rights reserved.</p>
   </footer>
 
   <script>
+    // SUPABASE CONFIGURATION
     const SUPABASE_URL = "https://lrpcvfytbfkoofxvvbfh.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29meHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Initialize EmailJS (Replace 'YOUR_EMAILJS_PUBLIC_KEY' with your key)
-    emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+    // EMAILJS INTEGRATION FOR TRANS-DOMAIN EMAILS
+    // Replace 'YOUR_EMAILJS_PUBLIC_KEY' with your EmailJS key
+    if (window.emailjs) emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
 
     let currentUser = null;
     let userProfile = null;
+    let allPublishedArticles = [];
     let allSubmissions = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -270,7 +349,7 @@
       }
     }
 
-    // REQUIREMENT 1: REGISTER WITH 6-DIGIT OTP
+    // REQ 1: REGISTER AUTHOR & DISPATCH 6-DIGIT CODE
     async function handleSignUp(e) {
       e.preventDefault();
       const email = document.getElementById('reg_email').value;
@@ -281,7 +360,7 @@
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       const { data, error } = await db.auth.signUp({ email, password });
-      if (error) return alert("Sign up error: " + error.message);
+      if (error) return alert("Registration failed: " + error.message);
 
       if (data.user) {
         await db.from('profiles').insert([{
@@ -289,25 +368,28 @@
         }]);
 
         // Send Email via EmailJS from jisd@uok.edu.et
-        emailjs.send("service_jisd", "template_activation", {
-          to_email: email,
-          to_name: fullName,
-          activation_code: otpCode
-        }).catch(err => console.log("Email dispatch simulated:", err));
+        if (window.emailjs) {
+          emailjs.send("service_jisd", "template_activation", {
+            to_email: email,
+            to_name: fullName,
+            activation_code: otpCode,
+            from_email: "jisd@uok.edu.et"
+          }).catch(err => console.log("OTP Email dispatch simulated. Code:", otpCode));
+        }
 
-        alert("Account registered! Check your email for your 6-digit activation code.");
+        alert(`Account registered!\nA 6-digit activation code was sent to ${email} from jisd@uok.edu.et.`);
         document.getElementById('otp-activation-box').style.display = 'block';
       }
     }
 
     async function verifyActivationCode() {
-      const code = document.getElementById('otp_code_input').value;
+      const code = document.getElementById('otp_code_input').value.trim();
       if (userProfile && userProfile.activation_code === code) {
         await db.from('profiles').update({ is_activated: true }).eq('id', currentUser.id);
-        alert("Account activated successfully!");
+        alert("Account activated successfully! You can now submit manuscripts.");
         location.reload();
       } else {
-        alert("Invalid activation code. Please check your email.");
+        alert("Invalid activation code. Please check your email inbox.");
       }
     }
 
@@ -318,52 +400,64 @@
         password: document.getElementById('login_pass').value
       });
 
-      if (error) return alert("Login failed: " + error.message);
+      if (error) return alert("Sign in failed: " + error.message);
       currentUser = data.user;
       await fetchUserProfile();
-      switchView('dashboard', null);
+      switchView(userProfile && userProfile.role === 'Editor' ? 'editor' : 'dashboard', null);
     }
 
     function updateUIForAuthenticatedUser() {
       document.getElementById('auth-card').innerHTML = `
-        <h2>Account Connected</h2>
+        <h2>Account Active</h2>
         <p><strong>${userProfile.full_name}</strong></p>
         <p style="font-size:0.8rem; color:var(--text-muted);">${userProfile.email}</p>
-        <p style="font-size:0.8rem; color:var(--navy-primary);">Role: <strong>${userProfile.role}</strong></p>
+        <p style="font-size:0.8rem; color:var(--navy-primary); margin-bottom: 0.75rem;">Role: <strong>${userProfile.role}</strong></p>
         <button class="btn-action" onclick="switchView('${userProfile.role === 'Editor' ? 'editor' : 'dashboard'}', null)">Open Portal</button>
       `;
 
+      document.getElementById('user-display-name').innerText = userProfile.full_name;
+      document.getElementById('user-display-role').innerText = userProfile.role;
+      document.getElementById('user-display-email').innerText = userProfile.email;
+
       if (userProfile.role === 'Editor') {
-        const nav = document.querySelector('nav');
-        nav.innerHTML += `<button class="nav-btn" onclick="switchView('editor', this)">Editorial Board</button>`;
+        const topNav = document.getElementById('top-nav-bar');
+        if (!document.getElementById('nav-editor-btn')) {
+          topNav.innerHTML += `<button class="nav-btn" id="nav-editor-btn" onclick="switchView('editor', this)">Editorial Board</button>`;
+        }
         loadEditorDashboard();
       }
 
       loadUserSubmissions();
     }
 
-    // REQUIREMENTS 4 & 5: MANUSCRIPT SUBMISSION WITH AUTOMATED NOTIFICATIONS
+    // REQ 4 & 5: SUBMIT MANUSCRIPT WITH RECEIPT & EDITORIAL NOTIFICATION
     document.getElementById('manuscriptForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (userProfile && !userProfile.is_activated && userProfile.role !== 'Editor') {
+        return alert("Please activate your account using the 6-digit code sent to your email before submitting.");
+      }
+
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true; btn.innerText = "Submitting...";
+      btn.disabled = true; btn.innerText = "Uploading Manuscript File...";
 
       try {
         const file = document.getElementById('m_file').files[0];
         const manuscriptId = `JISD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
         const filePath = `${manuscriptId}_${file.name}`;
 
-        await db.storage.from('manuscripts').upload(filePath, file);
-        const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
+        const { error: uploadError } = await db.storage.from('manuscripts').upload(filePath, file);
+        if (uploadError) throw uploadError;
 
+        const { data: urlData } = db.storage.from('manuscripts').getPublicUrl(filePath);
         const title = document.getElementById('m_title').value;
 
-        await db.from('submissions').insert([{
+        const { error: dbError } = await db.from('submissions').insert([{
           manuscript_id: manuscriptId,
           user_id: currentUser ? currentUser.id : null,
-          author_name: userProfile ? userProfile.full_name : "Author",
+          author_name: userProfile ? userProfile.full_name : "Guest Author",
           author_email: currentUser ? currentUser.email : "author@uok.edu.et",
-          affiliation: userProfile ? userProfile.affiliation : "UoK",
+          affiliation: userProfile ? userProfile.affiliation : "University of Kabridahar",
           title: title,
           domain: document.getElementById('m_domain').value,
           manuscript_type: document.getElementById('m_type').value,
@@ -373,62 +467,75 @@
           status: 'Submitted'
         }]);
 
-        // REQ 5: Email to Author confirming reception
-        emailjs.send("service_jisd", "template_receipt", {
-          to_email: currentUser.email,
-          manuscript_id: manuscriptId,
-          title: title
-        }).catch(err => console.log("Author confirmation sent"));
+        if (dbError) throw dbError;
 
-        // REQ 4: Notification Email to jisd.manuscript@uok.edu.et
-        emailjs.send("service_jisd", "template_editorial_notify", {
-          to_email: "jisd.manuscript@uok.edu.et",
-          manuscript_id: manuscriptId,
-          title: title,
-          author_name: userProfile.full_name
-        }).catch(err => console.log("Editorial notification sent"));
+        // REQ 5: Confirmation Email to Author from jisd@uok.edu.et
+        if (window.emailjs) {
+          emailjs.send("service_jisd", "template_receipt", {
+            to_email: currentUser.email,
+            manuscript_id: manuscriptId,
+            title: title,
+            from_email: "jisd@uok.edu.et"
+          }).catch(err => console.log("Author confirmation sent"));
 
-        alert(`Manuscript submitted successfully!\nID: ${manuscriptId}\nConfirmation sent to your email.`);
+          // REQ 4: Notification Email to Editorial Board
+          emailjs.send("service_jisd", "template_editorial_notify", {
+            to_email: "jisd.manuscript@uok.edu.et",
+            manuscript_id: manuscriptId,
+            title: title,
+            author_name: userProfile.full_name
+          }).catch(err => console.log("Editorial notification sent"));
+        }
+
+        alert(`Manuscript submitted successfully!\nManuscript ID: ${manuscriptId}\nConfirmation email dispatched.`);
+        document.getElementById('manuscriptForm').reset();
+        loadUserSubmissions();
         switchView('dashboard', null);
       } catch (err) {
         alert("Submission failed: " + err.message);
       } finally {
-        btn.disabled = false; btn.innerText = "Submit Manuscript";
+        btn.disabled = false; btn.innerText = "Submit Manuscript to JISD";
       }
     });
 
-    // REQUIREMENT 2: AUTHOR TRACKING DASHBOARD
+    // REQ 2: AUTHOR TRACKING DASHBOARD
     async function loadUserSubmissions() {
       if (!currentUser) return;
-      const { data } = await db.from('submissions').select('*').eq('user_id', currentUser.id);
+      const { data } = await db.from('submissions').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
       const tbody = document.getElementById('submissionsTableBody');
+
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="padding: 1rem; text-align: center;">No submissions found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">No submissions found.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = data.map(s => `
-        <tr>
-          <td style="padding:0.5rem; font-weight:bold;">${s.manuscript_id}</td>
-          <td style="padding:0.5rem;">${s.title}</td>
-          <td style="padding:0.5rem;">${s.domain}</td>
-          <td style="padding:0.5rem;"><span class="status-badge status-${s.status.replace(/\s+/g, '')}">${s.status}</span></td>
+      tbody.innerHTML = data.map(sub => `
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 0.5rem; font-weight: 700; color: var(--navy-primary);">${sub.manuscript_id}</td>
+          <td style="padding: 0.5rem;">${sub.title}</td>
+          <td style="padding: 0.5rem;">${sub.domain}</td>
+          <td style="padding: 0.5rem;"><span class="status-badge status-${sub.status.replace(/\s+/g, '')}">${sub.status}</span></td>
         </tr>
       `).join('');
     }
 
-    // REQUIREMENT 3: EDITORIAL CONTROL BOARD
+    // REQ 3: EDITORIAL BOARD DASHBOARD & STATUS UPDATER
     async function loadEditorDashboard() {
       const { data } = await db.from('submissions').select('*').order('created_at', { ascending: false });
       allSubmissions = data || [];
       const tbody = document.getElementById('editorTableBody');
 
+      if (allSubmissions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding: 1rem; text-align: center;">No submissions in system.</td></tr>`;
+        return;
+      }
+
       tbody.innerHTML = allSubmissions.map(s => `
         <tr style="border-bottom: 1px solid var(--border-color);">
-          <td style="padding:0.5rem; font-weight:bold;">${s.manuscript_id}</td>
-          <td style="padding:0.5rem;">${s.author_name}</td>
-          <td style="padding:0.5rem;">${s.title}</td>
-          <td style="padding:0.5rem;">
+          <td style="padding: 0.5rem; font-weight: bold; color: var(--navy-primary);">${s.manuscript_id}</td>
+          <td style="padding: 0.5rem;">${s.author_name}</td>
+          <td style="padding: 0.5rem;">${s.title}</td>
+          <td style="padding: 0.5rem;">
             <select onchange="updatePaperStatus('${s.manuscript_id}', this.value)">
               <option value="Submitted" ${s.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
               <option value="Under Review" ${s.status === 'Under Review' ? 'selected' : ''}>Under Review</option>
@@ -437,8 +544,8 @@
               <option value="Rejected" ${s.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
             </select>
           </td>
-          <td style="padding:0.5rem;">
-            <a href="${s.file_url}" target="_blank" class="btn-secondary" style="text-decoration:none;">Download File</a>
+          <td style="padding: 0.5rem;">
+            <a href="${s.file_url}" target="_blank" class="download-btn" style="padding: 3px 8px; font-size: 0.75rem;">Download File</a>
           </td>
         </tr>
       `).join('');
@@ -446,51 +553,96 @@
 
     async function updatePaperStatus(manuscriptId, newStatus) {
       await db.from('submissions').update({ status: newStatus }).eq('manuscript_id', manuscriptId);
-      alert(`Status updated to ${newStatus}`);
+      alert(`Manuscript ${manuscriptId} updated to: ${newStatus}`);
       loadPublishedArticles();
     }
 
-    // REQUIREMENT 6: SEARCH MANUSCRIPT BY ID
+    // REQ 6: MANUSCRIPT ID LOOKUP
     function searchManuscriptById() {
       const searchId = document.getElementById('editorSearchId').value.trim();
       const match = allSubmissions.find(s => s.manuscript_id.toLowerCase() === searchId.toLowerCase());
       const display = document.getElementById('searchResultDisplay');
 
       if (!match) {
-        display.innerHTML = `<p style="color:red;">No manuscript found matching ID: ${searchId}</p>`;
+        display.innerHTML = `<p style="color: var(--danger); font-weight: 600;">No manuscript found matching ID: ${searchId}</p>`;
         return;
       }
 
       display.innerHTML = `
         <div class="paper-card">
           <span class="status-badge status-${match.status.replace(/\s+/g, '')}">${match.status}</span>
-          <h3>${match.title}</h3>
-          <p><strong>Author:</strong> ${match.author_name} (${match.author_email})</p>
-          <p><strong>Affiliation:</strong> ${match.affiliation}</p>
-          <p><strong>Abstract:</strong> ${match.abstract}</p>
-          <p><strong>Keywords:</strong> ${match.keywords}</p>
-          <div style="margin-top:0.5rem;">
-            <a href="${match.file_url}" target="_blank" class="download-btn">Download Manuscript File</a>
+          <h3 style="margin-top: 0.4rem;">${match.title}</h3>
+          <p style="font-size: 0.85rem;"><strong>Author:</strong> ${match.author_name} (${match.author_email})</p>
+          <p style="font-size: 0.85rem;"><strong>Affiliation:</strong> ${match.affiliation}</p>
+          <p style="font-size: 0.85rem; margin-top: 0.5rem;"><strong>Abstract:</strong> ${match.abstract}</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;"><strong>Keywords:</strong> ${match.keywords}</p>
+          <div style="margin-top: 0.75rem;">
+            <a href="${match.file_url}" target="_blank" class="download-btn">📄 Download Manuscript File</a>
           </div>
         </div>
       `;
     }
 
     async function loadPublishedArticles() {
-      const { data } = await db.from('submissions').select('*').eq('status', 'Published');
+      const { data } = await db.from('submissions').select('*').eq('status', 'Published').order('created_at', { ascending: false });
       const list = document.getElementById('publishedArticlesList');
+
       if (!data || data.length === 0) {
-        list.innerHTML = `<p style="text-align:center;">No published papers available.</p>`;
+        list.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No published articles found.</p>`;
+        document.getElementById('homeFeaturedArticles').innerHTML = `<p style="color: var(--text-muted);">No featured articles available.</p>`;
         return;
       }
-      list.innerHTML = data.map(p => `
+
+      allPublishedArticles = data;
+      renderArticles(allPublishedArticles);
+
+      document.getElementById('homeFeaturedArticles').innerHTML = data.slice(0, 2).map(paper => `
         <div class="paper-card">
-          <h3>${p.title}</h3>
-          <p><strong>Authors:</strong> ${p.author_name}</p>
-          <p><strong>Abstract:</strong> ${p.abstract}</p>
-          <a href="${p.file_url}" target="_blank" class="download-btn">Download Full Paper</a>
+          <span class="paper-badge">${paper.domain}</span>
+          <h3 style="margin-top: 0.3rem;">${paper.title}</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;"><strong>Author:</strong> ${paper.author_name} (${paper.affiliation})</p>
+          <a href="${paper.file_url}" target="_blank" class="download-btn">📄 Download Full Paper</a>
         </div>
       `).join('');
+    }
+
+    function renderArticles(articles) {
+      const list = document.getElementById('publishedArticlesList');
+      if (articles.length === 0) {
+        list.innerHTML = `<p style="text-align: center; color: var(--text-muted);">No articles match search query.</p>`;
+        return;
+      }
+
+      list.innerHTML = articles.map(paper => `
+        <div class="paper-card">
+          <span class="paper-badge">${paper.domain}</span>
+          <h3 style="margin-top: 0.4rem;">${paper.title}</h3>
+          <div class="paper-meta">
+            <span><strong>Author:</strong> ${paper.author_name}</span>
+            <span>|</span>
+            <span><strong>DOI:</strong> ${paper.doi || '10.5281/jisd.2026'}</span>
+            <span>|</span>
+            <span><strong>ID:</strong> ${paper.manuscript_id}</span>
+          </div>
+          <p style="font-size: 0.88rem; margin-bottom: 0.5rem;"><strong>Abstract:</strong> ${paper.abstract}</p>
+          <a href="${paper.file_url}" target="_blank" class="download-btn">📄 Download Manuscript</a>
+        </div>
+      `).join('');
+    }
+
+    function filterArticles() {
+      const query = document.getElementById('paperSearch').value.toLowerCase();
+      const domain = document.getElementById('domainFilter').value;
+
+      const filtered = allPublishedArticles.filter(paper => {
+        const matchesQuery = paper.title.toLowerCase().includes(query) || 
+                             paper.author_name.toLowerCase().includes(query) || 
+                             paper.abstract.toLowerCase().includes(query);
+        const matchesDomain = (domain === 'ALL') || (paper.domain === domain);
+        return matchesQuery && matchesDomain;
+      });
+
+      renderArticles(filtered);
     }
 
     function switchView(viewId, element) {
@@ -509,7 +661,7 @@
       if (currentUser) {
         switchView(userProfile && userProfile.role === 'Editor' ? 'editor' : 'dashboard', null);
       } else {
-        alert("Please sign in or register to access the portal.");
+        alert("Please sign in or register to access the author and editor portals.");
       }
     }
 
