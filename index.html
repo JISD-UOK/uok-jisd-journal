@@ -25,16 +25,40 @@
 
     function App() {
       const [activeSection, setActiveSection] = useState('editorial-board');
+      const [currentUser, setCurrentUser] = useState(null);
+      const [showLoginModal, setShowLoginModal] = useState(false);
+      const [loginEmail, setLoginEmail] = useState('');
+      const [loginPassword, setLoginPassword] = useState('');
+      const [loginError, setLoginError] = useState('');
 
-      // Update Lucide icons on render
       useEffect(() => {
         if (window.lucide) {
           window.lucide.createIcons();
         }
-      }, [activeSection]);
+      }, [activeSection, currentUser, showLoginModal]);
 
-      // GitHub Base URL for images
       const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/your-username/your-repo/main";
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        if (loginEmail === 'mekuria.tsegaye20@uok.edu.et' && loginPassword === 'Editor@123') {
+          setCurrentUser({
+            name: 'Dr. Mekuria Tsegaye',
+            email: 'mekuria.tsegaye20@uok.edu.et',
+            role: 'Editor'
+          });
+          setShowLoginModal(false);
+          setLoginError('');
+          setLoginEmail('');
+          setLoginPassword('');
+        } else {
+          setLoginError('Invalid credentials. Use mekuria.tsegaye20@uok.edu.et / Editor@123');
+        }
+      };
+
+      const handleLogout = () => {
+        setCurrentUser(null);
+      };
 
       const boardMembers = [
         {
@@ -76,18 +100,37 @@
                   University of Kabridahar • Research, Publication and Ethics Dissemination Directorate (RPEDD)
                 </p>
               </div>
-              <div className="hidden sm:block">
-                <span className="bg-blue-800 text-blue-100 text-xs font-medium px-3 py-1 rounded-full border border-blue-700">
-                  ISSN: Pending | Open Access
-                </span>
+              <div className="flex items-center gap-3">
+                {currentUser ? (
+                  <div className="flex items-center gap-3 bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">
+                    <div className="text-right">
+                      <p className="text-xs font-bold leading-tight">{currentUser.name}</p>
+                      <p className="text-[10px] text-blue-200">{currentUser.role}</p>
+                    </div>
+                    <button 
+                      onClick={handleLogout}
+                      className="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-white font-semibold transition"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setShowLoginModal(true)}
+                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-md shadow transition"
+                  >
+                    <i data-lucide="log-in" className="w-4 h-4"></i>
+                    Editor Login
+                  </button>
+                )}
               </div>
             </div>
           </header>
 
-          {/* Main Layout Container */}
+          {/* Main Layout */}
           <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
             
-            {/* Sidebar Navigation */}
+            {/* Sidebar */}
             <aside className="w-full md:w-64 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 sticky top-6">
                 <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">
@@ -132,8 +175,22 @@
               </div>
             </aside>
 
-            {/* Main Content Area */}
+            {/* Content Area */}
             <main className="flex-1">
+              {/* About Section */}
+              {activeSection === 'about' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">About JISD</h2>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    The <strong>Journal of Integrative Science Development (JISD)</strong> is an open-access, peer-reviewed scientific journal published bi-annually by the Research, Publication and Ethics Dissemination Directorate (RPEDD) at the University of Kabridahar, Ethiopia.
+                  </p>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    JISD serves as an institutional and international platform for sharing interdisciplinary research aimed at resolving local, regional, and national challenges through evidence-based scientific practices.
+                  </p>
+                </div>
+              )}
+
+              {/* Editorial Board Section */}
               {activeSection === 'editorial-board' && (
                 <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
                   <div className="border-b border-gray-200 pb-4 mb-6">
@@ -149,7 +206,6 @@
                         key={index} 
                         className="flex flex-col sm:flex-row gap-4 p-5 rounded-lg border border-gray-200 bg-gray-50/50 hover:shadow-md transition-shadow"
                       >
-                        {/* Profile Image with GitHub Raw Integration */}
                         <div className="flex-shrink-0">
                           <img
                             src={member.image || "https://via.placeholder.com/150?text=JISD"}
@@ -161,7 +217,6 @@
                           />
                         </div>
 
-                        {/* Details */}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-base font-bold text-gray-900">{member.name}</h3>
@@ -194,23 +249,133 @@
                 </div>
               )}
 
-              {activeSection !== 'editorial-board' && (
-                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 text-center py-16">
-                  <i data-lucide="file-text" className="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
-                  <h3 className="text-lg font-bold text-gray-800 capitalize">
-                    {activeSection.replace('-', ' ')}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">
-                    Section content is active. Refer to official JISD guidelines for detailed policies.
+              {/* Aims & Scope */}
+              {activeSection === 'aims-scope' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Aims & Scope</h2>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    JISD accepts original, unpublished contributions across five major disciplines:
                   </p>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-2">
+                    <li><strong>Social Sciences & Humanities:</strong> Governance, development studies, linguistics, and cultural research.</li>
+                    <li><strong>Natural & Computational Sciences:</strong> Biology, chemistry, mathematics, and climate sciences.</li>
+                    <li><strong>Business & Economics:</strong> Microfinance, agribusiness, trade, and economic modeling.</li>
+                    <li><strong>Engineering & Technology:</strong> Water resources engineering, ICT solutions, and renewable energy.</li>
+                    <li><strong>Health Sciences:</strong> Public health, epidemiology, and clinical studies.</li>
+                  </ul>
+                </div>
+              )}
+
+              {/* Publication Ethics */}
+              {activeSection === 'ethics-policy' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Publication Ethics</h2>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                    JISD enforces a strict anti-plagiarism policy. All submitted manuscripts are screened using automated similarity checker tools.
+                  </p>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-2">
+                    <li><strong>Similarity Limit:</strong> Manuscripts exceeding standard similarity thresholds are returned for revision or rejected.</li>
+                    <li><strong>Double-Blind Review:</strong> Author and reviewer identities are masked during peer evaluation.</li>
+                    <li><strong>Integrity:</strong> Zero tolerance for data fabrication, duplicate submission, or improper authorship claims.</li>
+                  </ul>
+                </div>
+              )}
+
+              {/* Author Guidelines */}
+              {activeSection === 'author-guidelines' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Author Guidelines</h2>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <p><strong>Original Research:</strong> Up to 8,000 words excluding references.</p>
+                    <p><strong>Review Articles:</strong> Comprehensive critical syntheses of literature.</p>
+                    <p><strong>Short Communications:</strong> Brief empirical reports under 3,000 words.</p>
+                    <p><strong>Policy Briefs:</strong> Executive policy summaries (2–4 pages).</p>
+                  </div>
+                </div>
+              )}
+
+              {/* APC Info */}
+              {activeSection === 'apc-info' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Article Processing Charges (APC)</h2>
+                  <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-md text-sm">
+                    <strong>Zero Publication Fees:</strong> JISD is fully sponsored by the University of Kabridahar. Authors are not charged any submission, processing, or publication fees.
+                  </div>
+                </div>
+              )}
+
+              {/* Review Timeline */}
+              {activeSection === 'review-process' && (
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900 border-b pb-4 mb-4">Peer Review Timeline</h2>
+                  <ol className="list-decimal pl-5 text-sm text-gray-700 space-y-2">
+                    <li><strong>Initial Screening:</strong> 1–2 weeks (Desk evaluation by Editor-in-Chief).</li>
+                    <li><strong>Peer Review:</strong> 4–6 weeks (Double-blind evaluation by two independent reviewers).</li>
+                    <li><strong>Revision & Decision:</strong> 2–3 weeks.</li>
+                    <li><strong>Publication:</strong> Published bi-annually (January and June issues).</li>
+                  </ol>
                 </div>
               )}
             </main>
 
           </div>
 
+          {/* Login Modal */}
+          {showLoginModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">Editor Login</h3>
+                  <button 
+                    onClick={() => setShowLoginModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                  >
+                    &times;
+                  </button>
+                </div>
+
+                {loginError && (
+                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded">
+                    {loginError}
+                  </div>
+                )}
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
+                    <input 
+                      type="email"
+                      required
+                      placeholder="mekuria.tsegaye20@uok.edu.et"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      className="w-full text-sm p-2.5 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+                    <input 
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="w-full text-sm p-2.5 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2.5 rounded-md transition"
+                  >
+                    Log In
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
-          <footer className="bg-gray-900 text-gray-400 text-xs py-6 mt-auto">
+          <footer className="bg-gray-900 text-gray-400 text-xs py-6 mt-auto border-t border-gray-800">
             <div className="max-w-7xl mx-auto px-4 text-center">
               <p>© {new Date().getFullYear()} Journal of Integrative Science Development (JISD) • University of Kabridahar</p>
             </div>
