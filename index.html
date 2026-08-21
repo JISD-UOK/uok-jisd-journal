@@ -23,6 +23,8 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxycGN2Znl0YmZrb29meHZ2YmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDcyODQsImV4cCI6MjEwMjgyMzI4NH0.KsfHt7iAaH_mu42RRbazN_-jHrLucKOC1YgNjVCTkTg";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const ADMIN_EMAIL = "mekuria.tsegaye20@uok.edu.et";
+
     function App() {
       const [activeTab, setActiveTab] = useState('published-articles');
       const [currentUser, setCurrentUser] = useState(null);
@@ -36,16 +38,29 @@
       const [authPassword, setAuthPassword] = useState('');
       const [regFullName, setRegFullName] = useState('');
       const [regAffiliation, setRegAffiliation] = useState('University of Kabridahar');
+      
+      // Edit Profile State
       const [editFullName, setEditFullName] = useState('');
       const [editAffiliation, setEditAffiliation] = useState('');
+      const [editPassword, setEditPassword] = useState('');
+
+      // Create Team Member State (Admin Portal)
+      const [teamEmail, setTeamEmail] = useState('');
+      const [teamPassword, setTeamPassword] = useState('');
+      const [teamFullName, setTeamFullName] = useState('');
+      const [teamAffiliation, setTeamAffiliation] = useState('University of Kabridahar');
+      const [teamRole, setTeamRole] = useState('Associate Editor');
+
       const [authError, setAuthError] = useState('');
       const [isSubmitting, setIsSubmitting] = useState(false);
 
       // Data States
       const [submissions, setSubmissions] = useState([]);
+      const [userProfilesList, setUserProfilesList] = useState([]);
       const [selectedCategory, setSelectedCategory] = useState('All');
       const [searchTerm, setSearchTerm] = useState('');
       const [editorSearchId, setEditorSearchId] = useState('');
+      const [editorTab, setEditorTab] = useState('manuscripts');
 
       // Submission Form State
       const [formData, setFormData] = useState({
@@ -67,7 +82,7 @@
 
       useEffect(() => {
         if (window.lucide) window.lucide.createIcons();
-      }, [activeTab, currentUser, userProfile, showAuthModal, showProfileModal, authMode, submissions, coAuthors, selectedCategory, searchTerm, editorSearchId]);
+      }, [activeTab, currentUser, userProfile, showAuthModal, showProfileModal, authMode, submissions, userProfilesList, editorTab]);
 
       const initSession = async () => {
         const { data: { session } } = await db.auth.getSession();
@@ -77,22 +92,22 @@
         }
       };
 
-      // Safely fetch or create/upsert user profile in Supabase database
-      const syncProfile = async (authUser, fallbackName = '', fallbackAffiliation = '') => {
+      const syncProfile = async (authUser, fallbackName = '', fallbackAffiliation = '', assignedRole = null) => {
         const userId = authUser.id;
         const email = authUser.email;
-        const role = email === 'mekuria.tsegaye20@uok.edu.et' ? 'Editor' : 'Author';
+        
+        let role = assignedRole;
+        if (!role) {
+          role = email === ADMIN_EMAIL ? 'Administrator' : 'Author';
+        }
 
-        // Check if profile row exists
         const { data: existingProfile } = await db.from('profiles').select('*').eq('id', userId).single();
 
         if (existingProfile) {
-          const profileWithRole = { ...existingProfile, role };
-          setUserProfile(profileWithRole);
+          setUserProfile(existingProfile);
           setEditFullName(existingProfile.full_name || '');
           setEditAffiliation(existingProfile.affiliation || '');
         } else {
-          // Profile doesn't exist yet, insert new record
           const newProfile = {
             id: userId,
             email: email,
@@ -107,7 +122,6 @@
             setEditFullName(createdProfile.full_name);
             setEditAffiliation(createdProfile.affiliation);
           } else {
-            // Fallback local display state if table write fails
             setUserProfile(newProfile);
             setEditFullName(newProfile.full_name);
             setEditAffiliation(newProfile.affiliation);
@@ -118,6 +132,11 @@
       const fetchSubmissions = async () => {
         const { data, error } = await db.from('submissions').select('*').order('created_at', { ascending: false });
         if (!error && data) setSubmissions(data);
+      };
+
+      const fetchAllProfiles = async () => {
+        const { data, error } = await db.from('profiles').select('*').order('created_at', { ascending: false });
+        if (!error && data) setUserProfilesList(data);
       };
 
       const handleAuthSubmit = async (e) => {
@@ -151,6 +170,47 @@
         }
       };
 
+      const handleCreateTeamMember = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+          // Register User Account in Supabase Auth
+          const { data, error } = await db.auth.signUp({ 
+            email: teamEmail, 
+            password: teamPassword 
+          });
+
+          if (error) throw error;
+
+          if (data.user) {
+            // Write Profile directly to Profiles database table
+            const teamProfile = {
+              id: data.user.id,
+              email: teamEmail,
+              full_name: teamFullName,
+              affiliation: teamAffiliation,
+              role: teamRole
+            };
+
+            const { error: profileErr } = await db.from('profiles').upsert(teamProfile);
+            if (profileErr) throw profileErr;
+
+            alert(`Successfully created account for ${teamFullName} as ${teamRole}!`);
+            setTeamEmail('');
+            setTeamPassword('');
+            setTeamFullName('');
+            setTeamAffiliation('University of Kabridahar');
+            setTeamRole('Associate Editor');
+            fetchAllProfiles();
+          }
+        } catch (err) {
+          alert("Error creating staff account: " + err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
       const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -159,15 +219,22 @@
             id: currentUser.id,
             email: currentUser.email,
             full_name: editFullName,
-            affiliation: editAffiliation
+            affiliation: editAffiliation,
+            role: userProfile.role
           };
 
           const { error } = await db.from('profiles').upsert(updatedData);
           if (error) throw error;
 
+          if (editPassword.trim() !== '') {
+            const { error: pwdError } = await db.auth.updateUser({ password: editPassword });
+            if (pwdError) throw pwdError;
+          }
+
           setUserProfile({ ...userProfile, full_name: editFullName, affiliation: editAffiliation });
           alert("Profile updated successfully!");
           setShowProfileModal(false);
+          setEditPassword('');
         } catch (err) {
           alert("Failed to update profile: " + err.message);
         } finally {
@@ -263,6 +330,8 @@
         return isPublished && matchesCategory && matchesSearch;
       });
 
+      const isStaffOrAdmin = userProfile && ['Administrator', 'Editor', 'Associate Editor', 'Reviewer'].includes(userProfile.role);
+
       return (
         <div className="min-h-screen flex flex-col bg-slate-100">
           
@@ -291,10 +360,10 @@
                   <div className="flex items-center gap-3 bg-slate-900 border border-slate-700 px-3.5 py-1.5 rounded-md shadow-sm">
                     <div className="text-right">
                       <p className="text-xs font-bold text-amber-400">
-                        Welcome, {userProfile?.full_name || currentUser.email.split('@')[0]}
+                        {userProfile?.full_name || currentUser.email.split('@')[0]}
                       </p>
                       <p className="text-[10px] text-slate-300 font-medium capitalize">
-                        {userProfile?.role || 'Author'} Account
+                        {userProfile?.role || 'Author'}
                       </p>
                     </div>
 
@@ -305,7 +374,7 @@
                         title="Modify Profile Details"
                       >
                         <i data-lucide="user-cog" className="w-3.5 h-3.5"></i>
-                        Edit Profile
+                        Profile Settings
                       </button>
 
                       <button 
@@ -414,15 +483,15 @@
                         <span>Author Submissions</span>
                       </button>
 
-                      {userProfile?.role === 'Editor' && (
+                      {isStaffOrAdmin && (
                         <button
-                          onClick={() => setActiveTab('editor-portal')}
+                          onClick={() => { setActiveTab('editor-portal'); fetchAllProfiles(); }}
                           className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-md transition mt-2 ${
                             activeTab === 'editor-portal' ? 'bg-emerald-700 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                           }`}
                         >
-                          <i data-lucide="sliders" className="w-4 h-4"></i>
-                          <span>Editor Control Panel</span>
+                          <i data-lucide="shield" className="w-4 h-4"></i>
+                          <span>Editorial Control Panel</span>
                         </button>
                       )}
                     </>
@@ -533,16 +602,15 @@
                   
                   <div className="space-y-3">
                     <div className="p-3 bg-slate-50 border rounded">
-                      <h3 className="font-bold text-sm text-slate-900">Editor-in-Chief</h3>
+                      <h3 className="font-bold text-sm text-slate-900">Editor-in-Chief & Administrator</h3>
                       <p className="text-slate-700 font-semibold">Dr. Mekuria Tsegaye</p>
                       <p className="text-slate-500">Directorate of Research, Publication, & Extension • University of Kabridahar</p>
                       <p className="text-slate-500">Email: mekuria.tsegaye20@uok.edu.et</p>
                     </div>
 
                     <div className="p-3 bg-slate-50 border rounded">
-                      <h3 className="font-bold text-sm text-slate-900">Managing Editors</h3>
-                      <p className="text-slate-700 font-semibold">Dr. Ahmed Hassan</p>
-                      <p className="text-slate-500">College of Natural & Computational Sciences • University of Kabridahar</p>
+                      <h3 className="font-bold text-sm text-slate-900">Associate Editors & Managing Staff</h3>
+                      <p className="text-slate-500">Internal editorial staff access via secure Editorial Control Panel.</p>
                     </div>
                   </div>
                 </div>
@@ -702,64 +770,177 @@
                 </div>
               )}
 
-              {/* EDITOR DASHBOARD */}
-              {activeTab === 'editor-portal' && userProfile?.role === 'Editor' && (
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-emerald-300">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3 mb-4">
-                    <h2 className="text-lg font-bold text-emerald-950">Editorial Control Panel</h2>
-                    <div className="w-full sm:w-64">
-                      <input 
-                        type="text" 
-                        placeholder="Filter by Manuscript ID..." 
-                        value={editorSearchId}
-                        onChange={e => setEditorSearchId(e.target.value)}
-                        className="w-full p-2 text-xs border border-emerald-400 rounded outline-none focus:ring-2 focus:ring-emerald-600"
-                      />
+              {/* EDITORIAL CONTROL PANEL & STAFF MANAGEMENT */}
+              {activeTab === 'editor-portal' && isStaffOrAdmin && (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-emerald-300 space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
+                    <div>
+                      <h2 className="text-lg font-bold text-emerald-950">Editorial Control Panel</h2>
+                      <p className="text-xs text-emerald-700">Logged in as: <strong>{userProfile?.full_name} ({userProfile?.role})</strong></p>
+                    </div>
+
+                    <div className="flex bg-slate-100 p-1 rounded-md border text-xs font-bold">
+                      <button 
+                        onClick={() => setEditorTab('manuscripts')}
+                        className={`px-3 py-1 rounded transition ${editorTab === 'manuscripts' ? 'bg-emerald-700 text-white' : 'text-slate-600'}`}
+                      >
+                        Manuscripts
+                      </button>
+                      
+                      {['Administrator', 'Editor'].includes(userProfile?.role) && (
+                        <button 
+                          onClick={() => { setEditorTab('team'); fetchAllProfiles(); }}
+                          className={`px-3 py-1 rounded transition ${editorTab === 'team' ? 'bg-emerald-700 text-white' : 'text-slate-600'}`}
+                        >
+                          Team & Reviewers
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b-2 border-slate-200 bg-emerald-50 text-emerald-950">
-                          <th className="p-2.5">Manuscript ID</th>
-                          <th className="p-2.5">Title & Author Details</th>
-                          <th className="p-2.5">Attachment</th>
-                          <th className="p-2.5">Update Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {submissions.filter(s => editorSearchId.trim() === '' || s.manuscript_id.toLowerCase().includes(editorSearchId.trim().toLowerCase())).map(s => (
-                          <tr key={s.id} className="border-b hover:bg-slate-50">
-                            <td className="p-2.5 font-bold text-slate-900">{s.manuscript_id}</td>
-                            <td className="p-2.5">
-                              <strong className="text-slate-900">{s.title}</strong><br/>
-                              <span className="text-slate-500">{s.author_name} ({s.author_email})</span>
-                            </td>
-                            <td className="p-2.5">
-                              <a href={s.file_url} target="_blank" rel="noreferrer" className="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded text-[10px] font-bold inline-block">
-                                Download PDF
-                              </a>
-                            </td>
-                            <td className="p-2.5">
-                              <select 
-                                value={s.status} 
-                                onChange={e => handleUpdateStatus(s.manuscript_id, e.target.value)}
-                                className="p-1 border rounded text-xs font-semibold bg-white"
-                              >
-                                <option value="Submitted">Submitted</option>
-                                <option value="Under Review">Under Review</option>
-                                <option value="Revision Requested">Revision Requested</option>
-                                <option value="Accepted">Accepted</option>
-                                <option value="Published">Published</option>
-                                <option value="Rejected">Rejected</option>
-                              </select>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {/* MANUSCRIPT SUBMISSIONS TAB */}
+                  {editorTab === 'manuscripts' && (
+                    <div className="space-y-3">
+                      <div className="w-full sm:w-64">
+                        <input 
+                          type="text" 
+                          placeholder="Filter by Manuscript ID..." 
+                          value={editorSearchId}
+                          onChange={e => setEditorSearchId(e.target.value)}
+                          className="w-full p-2 text-xs border border-emerald-400 rounded outline-none focus:ring-2 focus:ring-emerald-600"
+                        />
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b-2 border-slate-200 bg-emerald-50 text-emerald-950">
+                              <th className="p-2.5">Manuscript ID</th>
+                              <th className="p-2.5">Title & Author Details</th>
+                              <th className="p-2.5">Attachment</th>
+                              <th className="p-2.5">Update Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {submissions.filter(s => editorSearchId.trim() === '' || s.manuscript_id.toLowerCase().includes(editorSearchId.trim().toLowerCase())).map(s => (
+                              <tr key={s.id} className="border-b hover:bg-slate-50">
+                                <td className="p-2.5 font-bold text-slate-900">{s.manuscript_id}</td>
+                                <td className="p-2.5">
+                                  <strong className="text-slate-900">{s.title}</strong><br/>
+                                  <span className="text-slate-500">{s.author_name} ({s.author_email})</span>
+                                </td>
+                                <td className="p-2.5">
+                                  <a href={s.file_url} target="_blank" rel="noreferrer" className="bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded text-[10px] font-bold inline-block">
+                                    Download PDF
+                                  </a>
+                                </td>
+                                <td className="p-2.5">
+                                  <select 
+                                    value={s.status} 
+                                    onChange={e => handleUpdateStatus(s.manuscript_id, e.target.value)}
+                                    className="p-1 border rounded text-xs font-semibold bg-white"
+                                  >
+                                    <option value="Submitted">Submitted</option>
+                                    <option value="Under Review">Under Review</option>
+                                    <option value="Revision Requested">Revision Requested</option>
+                                    <option value="Accepted">Accepted</option>
+                                    <option value="Published">Published</option>
+                                    <option value="Rejected">Rejected</option>
+                                  </select>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* EDITORIAL TEAM CREATION & DIRECTORY TAB */}
+                  {editorTab === 'team' && ['Administrator', 'Editor'].includes(userProfile?.role) && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                      
+                      {/* CREATE NEW ACCOUNT FORM */}
+                      <div className="bg-slate-50 p-4 border rounded-lg space-y-3 md:col-span-1">
+                        <h3 className="font-bold text-slate-900 border-b pb-1 text-sm">Add Team / Reviewer</h3>
+                        <form onSubmit={handleCreateTeamMember} className="space-y-2.5">
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-0.5">Role *</label>
+                            <select 
+                              value={teamRole} 
+                              onChange={e => setTeamRole(e.target.value)}
+                              className="w-full p-2 border rounded bg-white font-bold"
+                            >
+                              <option value="Associate Editor">Associate Editor</option>
+                              <option value="Reviewer">Reviewer</option>
+                              <option value="Editor">Editor</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-0.5">Full Name *</label>
+                            <input type="text" required value={teamFullName} onChange={e => setTeamFullName(e.target.value)} className="w-full p-2 border rounded" placeholder="Dr. Ahmed Hassan" />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-0.5">Affiliation *</label>
+                            <input type="text" required value={teamAffiliation} onChange={e => setTeamAffiliation(e.target.value)} className="w-full p-2 border rounded" />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-0.5">Email Address *</label>
+                            <input type="email" required value={teamEmail} onChange={e => setTeamEmail(e.target.value)} className="w-full p-2 border rounded" placeholder="staff@uok.edu.et" />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-0.5">Assigned Password *</label>
+                            <input type="password" required value={teamPassword} onChange={e => setTeamPassword(e.target.value)} className="w-full p-2 border rounded" placeholder="••••••••" />
+                          </div>
+
+                          <button type="submit" disabled={isSubmitting} className="w-full bg-emerald-800 hover:bg-emerald-700 text-white font-bold py-2 rounded transition mt-2">
+                            {isSubmitting ? "Creating..." : "Create Staff Account"}
+                          </button>
+                        </form>
+                      </div>
+
+                      {/* TEAM DIRECTORY TABLE */}
+                      <div className="md:col-span-2 space-y-2">
+                        <h3 className="font-bold text-slate-900 border-b pb-1 text-sm">Editorial Team Directory</h3>
+                        <div className="overflow-x-auto border rounded">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="bg-slate-100 border-b font-bold text-slate-700">
+                                <th className="p-2">Name</th>
+                                <th className="p-2">Role</th>
+                                <th className="p-2">Affiliation</th>
+                                <th className="p-2">Email</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {userProfilesList.map(prof => (
+                                <tr key={prof.id} className="border-b hover:bg-slate-50">
+                                  <td className="p-2 font-bold text-slate-900">{prof.full_name}</td>
+                                  <td className="p-2">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                      prof.role === 'Administrator' ? 'bg-purple-100 text-purple-800' :
+                                      prof.role === 'Editor' ? 'bg-emerald-100 text-emerald-800' :
+                                      prof.role === 'Reviewer' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                      {prof.role}
+                                    </span>
+                                  </td>
+                                  <td className="p-2 text-slate-600">{prof.affiliation}</td>
+                                  <td className="p-2 text-slate-500 font-mono">{prof.email}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+
                 </div>
               )}
 
@@ -829,7 +1010,7 @@
               <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 border border-slate-200">
                 <h3 className="text-sm font-bold text-slate-900 border-b pb-2 mb-4 flex items-center gap-1.5">
                   <i data-lucide="user-cog" className="w-4 h-4 text-amber-600"></i>
-                  Modify Author Profile
+                  Update Account & Profile Details
                 </h3>
 
                 <form onSubmit={handleProfileUpdate} className="space-y-3 text-xs">
@@ -856,11 +1037,22 @@
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-400 mb-1">Email (Read Only)</label>
+                    <label className="block font-bold text-slate-700 mb-1">New Password (Leave blank to keep current)</label>
+                    <input 
+                      type="password" 
+                      value={editPassword} 
+                      onChange={e => setEditPassword(e.target.value)} 
+                      placeholder="••••••••"
+                      className="w-full p-2 border rounded outline-none focus:ring-1 focus:ring-slate-900" 
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-400 mb-1">Account Role & Email (Read Only)</label>
                     <input 
                       type="text" 
                       disabled 
-                      value={currentUser?.email || ''} 
+                      value={`${currentUser?.email || ''} (${userProfile?.role || 'Author'})`} 
                       className="w-full p-2 border rounded bg-slate-100 text-slate-500 cursor-not-allowed" 
                     />
                   </div>
