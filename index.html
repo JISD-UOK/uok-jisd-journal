@@ -39,7 +39,6 @@
       const [editFullName, setEditFullName] = useState('');
       const [editAffiliation, setEditAffiliation] = useState('');
       const [authError, setAuthError] = useState('');
-      const [authMessage, setAuthMessage] = useState('');
       const [isSubmitting, setIsSubmitting] = useState(false);
 
       // Data States
@@ -74,18 +73,45 @@
         const { data: { session } } = await db.auth.getSession();
         if (session?.user) {
           setCurrentUser(session.user);
-          await loadUserProfile(session.user.id, session.user.email);
+          await syncProfile(session.user);
         }
       };
 
-      const loadUserProfile = async (userId, email) => {
-        const { data } = await db.from('profiles').select('*').eq('id', userId).single();
-        if (data) {
-          let profile = data;
-          if (email === 'mekuria.tsegaye20@uok.edu.et') profile.role = 'Editor';
-          setUserProfile(profile);
-          setEditFullName(profile.full_name || '');
-          setEditAffiliation(profile.affiliation || '');
+      // Safely fetch or create/upsert user profile in Supabase database
+      const syncProfile = async (authUser, fallbackName = '', fallbackAffiliation = '') => {
+        const userId = authUser.id;
+        const email = authUser.email;
+        const role = email === 'mekuria.tsegaye20@uok.edu.et' ? 'Editor' : 'Author';
+
+        // Check if profile row exists
+        const { data: existingProfile } = await db.from('profiles').select('*').eq('id', userId).single();
+
+        if (existingProfile) {
+          const profileWithRole = { ...existingProfile, role };
+          setUserProfile(profileWithRole);
+          setEditFullName(existingProfile.full_name || '');
+          setEditAffiliation(existingProfile.affiliation || '');
+        } else {
+          // Profile doesn't exist yet, insert new record
+          const newProfile = {
+            id: userId,
+            email: email,
+            full_name: fallbackName || email.split('@')[0],
+            affiliation: fallbackAffiliation || 'University of Kabridahar',
+            role: role
+          };
+
+          const { data: createdProfile, error } = await db.from('profiles').upsert(newProfile).select().single();
+          if (!error && createdProfile) {
+            setUserProfile(createdProfile);
+            setEditFullName(createdProfile.full_name);
+            setEditAffiliation(createdProfile.affiliation);
+          } else {
+            // Fallback local display state if table write fails
+            setUserProfile(newProfile);
+            setEditFullName(newProfile.full_name);
+            setEditAffiliation(newProfile.affiliation);
+          }
         }
       };
 
@@ -97,7 +123,6 @@
       const handleAuthSubmit = async (e) => {
         e.preventDefault();
         setAuthError('');
-        setAuthMessage('');
         setIsSubmitting(true);
 
         try {
@@ -106,22 +131,17 @@
             if (error) throw error;
 
             setCurrentUser(data.user);
-            await loadUserProfile(data.user.id, data.user.email);
+            await syncProfile(data.user);
             setShowAuthModal(false);
           } else if (authMode === 'register') {
-            const { data, error } = await db.auth.signUp({
-              email: authEmail,
-              password: authPassword,
-              options: {
-                data: { full_name: regFullName, affiliation: regAffiliation, role: 'Author', is_activated: true }
-              }
-            });
+            const { data, error } = await db.auth.signUp({ email: authEmail, password: authPassword });
             if (error) throw error;
 
             if (data.user) {
-              alert("Registration successful! Please sign in.");
-              setAuthMode('login');
-              setAuthError('');
+              await syncProfile(data.user, regFullName, regAffiliation);
+              setCurrentUser(data.user);
+              setShowAuthModal(false);
+              alert("Account registered and logged in successfully!");
             }
           }
         } catch (err) {
@@ -135,15 +155,18 @@
         e.preventDefault();
         setIsSubmitting(true);
         try {
-          const { error } = await db.from('profiles').update({
+          const updatedData = {
+            id: currentUser.id,
+            email: currentUser.email,
             full_name: editFullName,
             affiliation: editAffiliation
-          }).eq('id', currentUser.id);
+          };
 
+          const { error } = await db.from('profiles').upsert(updatedData);
           if (error) throw error;
 
-          alert("Profile updated successfully!");
           setUserProfile({ ...userProfile, full_name: editFullName, affiliation: editAffiliation });
+          alert("Profile updated successfully!");
           setShowProfileModal(false);
         } catch (err) {
           alert("Failed to update profile: " + err.message);
@@ -169,7 +192,7 @@
 
       const handleFormSubmit = async (e) => {
         e.preventDefault();
-        if (!currentUser || !userProfile) {
+        if (!currentUser) {
           alert("Please login to submit your manuscript.");
           setShowAuthModal(true);
           return;
@@ -194,9 +217,9 @@
           const payload = {
             manuscript_id: manuscriptId,
             user_id: currentUser.id,
-            author_name: userProfile.full_name,
-            author_email: userProfile.email,
-            affiliation: userProfile.affiliation,
+            author_name: userProfile?.full_name || currentUser.email,
+            author_email: currentUser.email,
+            affiliation: userProfile?.affiliation || 'University of Kabridahar',
             title: formData.title,
             abstract: formData.abstract,
             keywords: formData.keywords,
@@ -235,8 +258,8 @@
         const isPublished = s.status === 'Published';
         const matchesCategory = selectedCategory === 'All' || s.category === selectedCategory;
         const matchesSearch = s.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              s.author_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              s.keywords.toLowerCase().includes(searchTerm.toLowerCase());
+                              (s.author_name && s.author_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                              (s.keywords && s.keywords.toLowerCase().includes(searchTerm.toLowerCase()));
         return isPublished && matchesCategory && matchesSearch;
       });
 
@@ -262,13 +285,17 @@
                 </div>
               </div>
 
-              {/* DYNAMIC HEADER USER CORNER */}
+              {/* DYNAMIC HEADER AUTHOR / USER CORNER */}
               <div className="flex items-center gap-3">
-                {currentUser && userProfile ? (
+                {currentUser ? (
                   <div className="flex items-center gap-3 bg-slate-900 border border-slate-700 px-3.5 py-1.5 rounded-md shadow-sm">
                     <div className="text-right">
-                      <p className="text-xs font-bold text-amber-400">Welcome, {userProfile.full_name}</p>
-                      <p className="text-[10px] text-slate-300 font-medium capitalize">{userProfile.role} Account</p>
+                      <p className="text-xs font-bold text-amber-400">
+                        Welcome, {userProfile?.full_name || currentUser.email.split('@')[0]}
+                      </p>
+                      <p className="text-[10px] text-slate-300 font-medium capitalize">
+                        {userProfile?.role || 'Author'} Account
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-1.5 border-l border-slate-700 pl-2.5">
@@ -404,10 +431,10 @@
               </div>
             </aside>
 
-            {/* CONTENT AREA */}
+            {/* MAIN CONTENT AREA */}
             <main className="flex-1">
 
-              {/* VIEW 1: PUBLISHED ARTICLES GALLERY */}
+              {/* PUBLISHED ARTICLES GALLERY */}
               {activeTab === 'published-articles' && (
                 <div className="space-y-4">
                   <div className="bg-white p-5 rounded-lg shadow-sm border border-slate-200">
@@ -421,7 +448,6 @@
                       </span>
                     </div>
                     
-                    {/* SEARCH & FILTERS */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                       <div className="sm:col-span-2">
                         <input 
@@ -448,7 +474,6 @@
                       </div>
                     </div>
 
-                    {/* ARTICLES CONTAINER */}
                     <div className="space-y-4">
                       {publishedArticles.length === 0 ? (
                         <div className="p-8 text-center text-slate-500 bg-slate-50 border rounded text-xs">
@@ -488,7 +513,7 @@
                 </div>
               )}
 
-              {/* VIEW 2: ABOUT JISD */}
+              {/* ABOUT JISD */}
               {activeTab === 'about-journal' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-4 text-xs leading-relaxed">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2">About JISD</h2>
@@ -501,7 +526,7 @@
                 </div>
               )}
 
-              {/* VIEW 3: EDITORIAL BOARD */}
+              {/* EDITORIAL BOARD */}
               {activeTab === 'editorial-board' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-4 text-xs">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2">Editorial Board</h2>
@@ -523,7 +548,7 @@
                 </div>
               )}
 
-              {/* VIEW 4: AIMS & SCOPE */}
+              {/* AIMS & SCOPE */}
               {activeTab === 'aims-scope' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-4 text-xs leading-relaxed">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2">Aims & Scope</h2>
@@ -538,7 +563,7 @@
                 </div>
               )}
 
-              {/* VIEW 5: AUTHOR GUIDELINES */}
+              {/* AUTHOR GUIDELINES */}
               {activeTab === 'author-guidelines' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 space-y-4 text-xs leading-relaxed">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2">Author Guidelines</h2>
@@ -550,7 +575,7 @@
                 </div>
               )}
 
-              {/* VIEW 6: MANUSCRIPT SUBMISSION WORKFLOW */}
+              {/* MANUSCRIPT SUBMISSION WORKFLOW */}
               {activeTab === 'submit-paper' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2 mb-4">Submit Your Manuscript</h2>
@@ -558,7 +583,7 @@
                   {!currentUser ? (
                     <div className="bg-amber-50 border border-amber-200 rounded p-4 text-xs text-amber-900 space-y-2">
                       <p className="font-bold">Account Authentication Required</p>
-                      <p>You must be logged in to submit manuscripts to JISD. Please authenticate or register with your institutional credentials.</p>
+                      <p>You must be logged in to submit manuscripts to JISD. Please authenticate or register with your credentials.</p>
                       <button onClick={() => { setAuthMode('login'); setShowAuthModal(true); }} className="bg-amber-600 text-white font-bold px-3 py-1.5 rounded">
                         Login or Register Now
                       </button>
@@ -602,7 +627,6 @@
                         <input type="text" required value={formData.keywords} onChange={e => setFormData({...formData, keywords: e.target.value})} className="w-full p-2.5 border rounded" placeholder="e.g., Hydrology, Soil Management, Kabridahar" />
                       </div>
 
-                      {/* DYNAMIC CO-AUTHORS SECTION */}
                       <div className="bg-slate-50 p-4 border rounded space-y-3">
                         <div className="flex justify-between items-center">
                           <h4 className="font-bold text-slate-800">Co-Author Information</h4>
@@ -643,7 +667,7 @@
                 </div>
               )}
 
-              {/* VIEW 7: AUTHOR SUBMISSIONS */}
+              {/* AUTHOR SUBMISSIONS */}
               {activeTab === 'author-portal' && currentUser && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-900 border-b pb-2 mb-4">Your Manuscript Submissions</h2>
@@ -678,7 +702,7 @@
                 </div>
               )}
 
-              {/* VIEW 8: EDITOR DASHBOARD */}
+              {/* EDITOR DASHBOARD */}
               {activeTab === 'editor-portal' && userProfile?.role === 'Editor' && (
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-emerald-300">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3 mb-4">
@@ -749,13 +773,13 @@
                 
                 <div className="flex border-b border-slate-200 mb-4 text-xs font-bold">
                   <button 
-                    onClick={() => { setAuthMode('login'); setAuthError(''); setAuthMessage(''); }}
+                    onClick={() => { setAuthMode('login'); setAuthError(''); }}
                     className={`flex-1 pb-2 text-center border-b-2 ${authMode === 'login' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400'}`}
                   >
                     Sign In
                   </button>
                   <button 
-                    onClick={() => { setAuthMode('register'); setAuthError(''); setAuthMessage(''); }}
+                    onClick={() => { setAuthMode('register'); setAuthError(''); }}
                     className={`flex-1 pb-2 text-center border-b-2 ${authMode === 'register' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400'}`}
                   >
                     Register Author
@@ -763,7 +787,6 @@
                 </div>
 
                 {authError && <div className="mb-3 text-xs bg-red-50 border border-red-200 text-red-700 p-2 rounded">{authError}</div>}
-                {authMessage && <div className="mb-3 text-xs bg-emerald-50 border border-emerald-200 text-emerald-700 p-2 rounded leading-relaxed">{authMessage}</div>}
 
                 <form onSubmit={handleAuthSubmit} className="space-y-3 text-xs">
                   {authMode === 'register' && (
@@ -791,7 +814,7 @@
                   <div className="flex justify-end gap-2 pt-2">
                     <button type="button" onClick={() => setShowAuthModal(false)} className="px-3 py-1.5 text-slate-500 rounded text-xs font-semibold">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="bg-slate-950 text-white px-4 py-1.5 rounded text-xs font-bold">
-                      {isSubmitting ? "Processing..." : authMode === 'login' ? "Sign In" : "Register Author"}
+                      {isSubmitting ? "Processing..." : authMode === 'login' ? "Sign In" : "Register & Sign In"}
                     </button>
                   </div>
                 </form>
@@ -800,7 +823,7 @@
             </div>
           )}
 
-          {/* MODIFY PROFILE MODAL */}
+          {/* EDIT PROFILE MODAL */}
           {showProfileModal && (
             <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 border border-slate-200">
@@ -837,7 +860,7 @@
                     <input 
                       type="text" 
                       disabled 
-                      value={userProfile?.email || currentUser?.email || ''} 
+                      value={currentUser?.email || ''} 
                       className="w-full p-2 border rounded bg-slate-100 text-slate-500 cursor-not-allowed" 
                     />
                   </div>
