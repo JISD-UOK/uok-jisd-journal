@@ -35,8 +35,6 @@
       const [authPassword, setAuthPassword] = useState('');
       const [regFullName, setRegFullName] = useState('');
       const [regAffiliation, setRegAffiliation] = useState('University of Kabridahar');
-      const [inputOtp, setInputOtp] = useState('');
-      const [pendingUserId, setPendingUserId] = useState(null);
       const [authError, setAuthError] = useState('');
       const [authMessage, setAuthMessage] = useState('');
       const [isSubmitting, setIsSubmitting] = useState(false);
@@ -102,42 +100,24 @@
             const { data, error } = await db.auth.signInWithPassword({ email: authEmail, password: authPassword });
             if (error) throw error;
 
-            const { data: profile } = await db.from('profiles').select('*').eq('id', data.user.id).single();
-            if (profile && !profile.is_activated && data.user.email !== 'mekuria.tsegaye20@uok.edu.et') {
-              setPendingUserId(data.user.id);
-              setAuthMode('verify');
-              setIsSubmitting(false);
-              return;
-            }
-
             setCurrentUser(data.user);
             await loadUserProfile(data.user.id, data.user.email);
             setShowAuthModal(false);
           } else if (authMode === 'register') {
-            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
+            // Direct sign-up without OTP step
             const { data, error } = await db.auth.signUp({
               email: authEmail,
               password: authPassword,
               options: {
-                data: { full_name: regFullName, affiliation: regAffiliation, role: 'Author', verification_otp: otpCode }
+                data: { full_name: regFullName, affiliation: regAffiliation, role: 'Author', is_activated: true }
               }
             });
             if (error) throw error;
 
             if (data.user) {
-              setPendingUserId(data.user.id);
-              setAuthMessage(`A 6-digit verification code has been dispatched from jisd@uok.edu.et to ${authEmail}. (For local test, code is saved in DB)`);
-              setAuthMode('verify');
-            }
-          } else if (authMode === 'verify') {
-            const { data: profile } = await db.from('profiles').select('*').eq('id', pendingUserId).single();
-            if (profile && profile.verification_otp === inputOtp) {
-              await db.from('profiles').update({ is_activated: true }).eq('id', pendingUserId);
-              alert("Account successfully verified! Please sign in.");
+              alert("Registration successful! You may now sign in.");
               setAuthMode('login');
-            } else {
-              setAuthError("Invalid activation code. Please check your details.");
+              setAuthError('');
             }
           }
         } catch (err) {
@@ -723,7 +703,7 @@
             </main>
           </div>
 
-          {/* AUTHENTICATION & OTP MODAL */}
+          {/* AUTHENTICATION MODAL */}
           {showAuthModal && (
             <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
               <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 border border-slate-200">
@@ -760,39 +740,19 @@
                     </>
                   )}
 
-                  {authMode !== 'verify' && (
-                    <>
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
-                        <input type="email" required value={authEmail} onChange={e => setAuthEmail(e.target.value)} className="w-full p-2 border rounded" placeholder="author@uok.edu.et" />
-                      </div>
-                      <div>
-                        <label className="block font-bold text-slate-700 mb-1">Password *</label>
-                        <input type="password" required value={authPassword} onChange={e => setAuthPassword(e.target.value)} className="w-full p-2 border rounded" placeholder="••••••••" />
-                      </div>
-                    </>
-                  )}
-
-                  {authMode === 'verify' && (
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">Enter 6-Digit Code *</label>
-                      <input 
-                        type="text" 
-                        maxLength="6" 
-                        required 
-                        value={inputOtp} 
-                        onChange={e => setInputOtp(e.target.value)} 
-                        className="w-full p-2.5 border rounded text-center tracking-widest font-mono text-lg" 
-                        placeholder="123456" 
-                      />
-                      <p className="text-[10px] text-slate-500 mt-1">Code sent from <strong>jisd@uok.edu.et</strong></p>
-                    </div>
-                  )}
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
+                    <input type="email" required value={authEmail} onChange={e => setAuthEmail(e.target.value)} className="w-full p-2 border rounded" placeholder="author@uok.edu.et" />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Password *</label>
+                    <input type="password" required value={authPassword} onChange={e => setAuthPassword(e.target.value)} className="w-full p-2 border rounded" placeholder="••••••••" />
+                  </div>
 
                   <div className="flex justify-end gap-2 pt-2">
                     <button type="button" onClick={() => setShowAuthModal(false)} className="px-3 py-1.5 text-slate-500 rounded text-xs font-semibold">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="bg-slate-950 text-white px-4 py-1.5 rounded text-xs font-bold">
-                      {isSubmitting ? "Processing..." : authMode === 'login' ? "Sign In" : authMode === 'register' ? "Register Author" : "Activate Account"}
+                      {isSubmitting ? "Processing..." : authMode === 'login' ? "Sign In" : "Register Author"}
                     </button>
                   </div>
                 </form>
