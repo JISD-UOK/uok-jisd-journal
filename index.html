@@ -98,7 +98,7 @@
         
         let role = assignedRole;
         if (!role) {
-          role = email === ADMIN_EMAIL ? 'Administrator' : 'Author';
+          role = email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'Administrator' : 'Author';
         }
 
         const { data: existingProfile } = await db.from('profiles').select('*').eq('id', userId).single();
@@ -111,7 +111,7 @@
           const newProfile = {
             id: userId,
             email: email,
-            full_name: fallbackName || email.split('@')[0],
+            full_name: fallbackName || (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'Dr. Mekuria Tsegaye' : email.split('@')[0]),
             affiliation: fallbackAffiliation || 'University of Kabridahar',
             role: role
           };
@@ -144,16 +144,36 @@
         setAuthError('');
         setIsSubmitting(true);
 
+        const cleanEmail = authEmail.trim();
+
         try {
           if (authMode === 'login') {
-            const { data, error } = await db.auth.signInWithPassword({ email: authEmail, password: authPassword });
+            // Step 1: Attempt standard Supabase Sign In
+            let { data, error } = await db.auth.signInWithPassword({ email: cleanEmail, password: authPassword });
+            
+            // Step 2: Auto-Provision Admin Account if credentials don't exist in Supabase DB yet
+            if (error && cleanEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+              const { data: signUpData, error: signUpErr } = await db.auth.signUp({ 
+                email: cleanEmail, 
+                password: authPassword 
+              });
+
+              if (!signUpErr && signUpData.user) {
+                data = signUpData;
+                error = null;
+              }
+            }
+
             if (error) throw error;
 
-            setCurrentUser(data.user);
-            await syncProfile(data.user);
-            setShowAuthModal(false);
+            if (data?.user) {
+              setCurrentUser(data.user);
+              await syncProfile(data.user, 'Dr. Mekuria Tsegaye', 'University of Kabridahar', 'Administrator');
+              setShowAuthModal(false);
+              setActiveTab('editor-portal');
+            }
           } else if (authMode === 'register') {
-            const { data, error } = await db.auth.signUp({ email: authEmail, password: authPassword });
+            const { data, error } = await db.auth.signUp({ email: cleanEmail, password: authPassword });
             if (error) throw error;
 
             if (data.user) {
@@ -164,7 +184,7 @@
             }
           }
         } catch (err) {
-          setAuthError(err.message);
+          setAuthError(err.message || "Authentication failed. Check your password.");
         } finally {
           setIsSubmitting(false);
         }
@@ -175,19 +195,17 @@
         setIsSubmitting(true);
 
         try {
-          // Register User Account in Supabase Auth
           const { data, error } = await db.auth.signUp({ 
-            email: teamEmail, 
+            email: teamEmail.trim(), 
             password: teamPassword 
           });
 
           if (error) throw error;
 
           if (data.user) {
-            // Write Profile directly to Profiles database table
             const teamProfile = {
               id: data.user.id,
-              email: teamEmail,
+              email: teamEmail.trim(),
               full_name: teamFullName,
               affiliation: teamAffiliation,
               role: teamRole
